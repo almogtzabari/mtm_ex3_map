@@ -71,6 +71,9 @@ Map mapCreate(copyMapDataElements copyDataElement, copyMapKeyElements copyKeyEle
  */
 MapResult mapPut(Map map, MapKeyElement keyElement,
                  MapDataElement dataElement){
+    if(!map){
+        return MAP_NULL_ARGUMENT;
+    }
     if(!mapContains(map,keyElement)){
         /* Key element does not exists in map.
          * Creating a new node. */
@@ -111,7 +114,6 @@ MapResult mapPut(Map map, MapKeyElement keyElement,
         return MAP_OUT_OF_MEMORY;
     }
     return MAP_SUCCESS;
-
 }
 
 /**
@@ -166,6 +168,7 @@ MapDataElement mapGet(Map map, MapKeyElement keyElement){
     }
     Node current_node=mapGetNodeByKey(map,keyElement);
     MapDataElement current_node_data=nodeGetData(current_node,map->copyDataElement);
+    map->iterator=NULL;
     return current_node_data;
 }
 
@@ -178,7 +181,62 @@ MapDataElement mapGet(Map map, MapKeyElement keyElement){
  * @return
  */
 bool mapContains(Map map, MapKeyElement element){
-    return (bool)mapGetNodeByKey(map,element);
+    if(!map || !element){
+        return false;
+    }
+    Node node=mapGetNodeByKey(map,element);
+    if(!node){
+        /*If the key doesn't exist/memory allocation error mapGetNodeByKey
+         * return's Null */
+        return false;
+    }
+    /*If we got here, the key exists*/
+    return true;
+}
+
+void mapDestroy(Map map){
+    if(map==NULL){
+        return;
+    }
+    MAP_FOREACH(MapKeyElement,iterator,map){
+        nodeDestroy(mapGetNodeByKey(map,iterator),
+                    map->freeDataElement,map->freeKeyElement);
+    }
+    free(map);
+}
+
+
+Map mapCopy(Map map){
+    if(!map){
+        return NULL;
+    }
+    Map new_map=mapCreate(map->copyDataElement,map->copyKeyElement,
+                          map->freeDataElement,map->freeKeyElement,
+                          map->compareKeyElements);
+    if(!new_map){
+        return NULL;
+    }
+    MapDataElement current_node_data;
+    MapResult result;
+    MAP_FOREACH(MapKeyElement,current_node_key,map){
+        current_node_data=mapGet(map,current_node_key);
+        result=mapPut(new_map,current_node_key,current_node_data);
+        map->freeDataElement(current_node_data); // Destroying data copy.
+        if(!result){
+            mapDestroy(new_map);
+            map->iterator=NULL;
+            return NULL;
+        }
+    }
+    map->iterator=NULL;
+    return new_map;
+}
+
+int mapGetSize(Map map){
+    if(!map){
+        return -1;
+    }
+    return map->mapSize;
 }
 
 //-----------------------------------------------------------------------//
@@ -216,6 +274,10 @@ static Node mapGetNodeByKey(Map map,MapKeyElement key){
     while(current_node) {
         /* Creates a copy of node's key. */
         current_node_key = nodeGetKey(current_node,map->copyKeyElement);
+        if(!current_node_key){
+            /* copy function might fail and return null */
+            return NULL;
+        }
         if (map->compareKeyElements(current_node_key, key) == 0) {
             map->freeKeyElement(current_node_key); // Destroying key copy.
             return current_node;
@@ -237,17 +299,6 @@ static Node mapGetPreviousNode(Map map, Node next_node){
     }
     /* If we got here then map is empty. */
     return NULL;
-}
-
-void mapDestroy(Map map){
-    if(map==NULL){
-        return;
-    }
-    MAP_FOREACH(MapKeyElement,iterator,map){
-        nodeDestroy(mapGetNodeByKey(map,iterator),
-                    map->freeDataElement,map->freeKeyElement);
-    }
-
 }
 
 
