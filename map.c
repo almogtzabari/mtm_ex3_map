@@ -2,7 +2,7 @@
 #include "node.h"
 #include <malloc.h>
 #include <assert.h>
-
+#include <stdio.h>
 //-----------------------------------------------------------------------//
 //                  DECLARATIONS OF STATIC FUNCTIONS                     //
 //-----------------------------------------------------------------------//
@@ -366,7 +366,9 @@ static Node mapNodeToPlaceBefore(Map map, MapKeyElement key){
  * @return - The node of that key in the map.
  */
 static Node mapGetNodeByKey(Map map,MapKeyElement key){
-    assert(!key);
+    if(key==NULL){
+        printf("afdsffdafdsfds");
+    }
     Node current_node = map->list; // Resetting to first node.
     MapKeyElement current_node_key;
     while(current_node) {
