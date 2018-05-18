@@ -165,13 +165,13 @@ MapKeyElement mapGetFirst(Map map){
  * @return
  */
 MapDataElement mapGet(Map map, MapKeyElement keyElement){
-    assert(!keyElement);
+    assert(keyElement!=NULL);
     if (!mapContains(map,keyElement)){
         /*Key does not exists in map */
         return NULL;
     }
     Node current_node = mapGetNodeByKey(map,keyElement);
-    assert(!current_node);
+    assert(current_node!=NULL);
     MapDataElement current_node_data=nodeGetData
             (current_node,map->copyDataElement);
     map->iterator=NULL;
@@ -391,7 +391,7 @@ static Node mapGetNodeByKey(Map map,MapKeyElement key){
  * @return - Returns the node before the given node in the map.
  */
 static Node mapGetPreviousNode(Map map, Node node) {
-    assert(!map);
+    assert(map!=NULL);
     Node node_iterator;
     MAP_FOREACH(MapKeyElement, iterator, map) {
         node_iterator = mapGetNodeByKey(map, iterator);
