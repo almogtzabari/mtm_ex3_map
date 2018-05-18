@@ -239,4 +239,15 @@ static Node mapGetPreviousNode(Map map, Node next_node){
     return NULL;
 }
 
+void mapDestroy(Map map){
+    if(map==NULL){
+        return;
+    }
+    MAP_FOREACH(MapKeyElement,iterator,map){
+        nodeDestroy(mapGetNodeByKey(map,iterator),
+                    map->freeDataElement,map->freeKeyElement);
+    }
+
+}
+
 
