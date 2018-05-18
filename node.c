@@ -102,14 +102,11 @@ MapDataElement nodeGetData(Node node,copyMapDataElements copyDataElement){
  ***** Function: nodeGetNext *****
  * Descritpion: Returns a copy of the next node (the node after the
  * given node).
- * Notice: User is responsible for destroying the node copy.
  * @param map - a pointer to a map.
  * @param node - a pointer to a node.
  * @return - Pointer to a copy of the node after the given node.
  */
-Node nodeGetNext(Map map, Node node){
-    /* todo: check if need to return a copy */
-    Node next_node =
+Node nodeGetNext(Node node){
     return node->next;
 }
 
