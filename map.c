@@ -41,9 +41,12 @@ struct Map_t{
  * key elements.
  * @return - A pointer to a new map if function succeeded, else NULL.
  */
-Map mapCreate(copyMapDataElements copyDataElement, copyMapKeyElements copyKeyElement,
-              freeMapDataElements freeDataElement, freeMapKeyElements freeKeyElement,
+Map mapCreate(copyMapDataElements copyDataElement,
+              copyMapKeyElements copyKeyElement,
+              freeMapDataElements freeDataElement,
+              freeMapKeyElements freeKeyElement,
               compareMapKeyElements compareKeyElements){
+
     Map map = malloc(sizeof(*map));
     if(!map){
         return NULL;
@@ -104,13 +107,15 @@ MapResult mapPut(Map map, MapKeyElement keyElement,
         return MAP_SUCCESS;
     }
 
-    /* If we got here, the key already exists and we need to modify it */
+    /* If we got here, the key already exists and we need to modify its
+     * data. */
     map->iterator = NULL; // Resetting iterator.
     NodeResult result = nodeSetData(mapGetNodeByKey(map,keyElement)
             ,dataElement,map->copyDataElement); // Modify data of key.
 
     if(result!=NODE_SUCCESS){
-        /* Couldn't create a copy of the new data. */
+        /* Couldn't create a copy of the new data.
+         * Node's data remained as it was. */
         return MAP_OUT_OF_MEMORY;
     }
     return MAP_SUCCESS;
@@ -219,7 +224,7 @@ Map mapCopy(Map map){
     MapDataElement current_node_data;
     MapResult result;
     MAP_FOREACH(MapKeyElement,current_node_key,map){
-        current_node_data=mapGet(map,current_node_key);
+        current_node_data = mapGet(map,current_node_key);
         result=mapPut(new_map,current_node_key,current_node_data);
         map->freeDataElement(current_node_data); // Destroying data copy.
         if(!result){
@@ -278,10 +283,12 @@ static Node mapGetNodeByKey(Map map,MapKeyElement key){
             /* copy function might fail and return null */
             return NULL;
         }
-        if (map->compareKeyElements(current_node_key, key) == 0) {
+        if (map->compareKeyElements(current_node_key, key) == 0){
+            /*  */
             map->freeKeyElement(current_node_key); // Destroying key copy.
             return current_node;
         }
+        map->freeKeyElement(current_node_key); // Destroying key copy.
         current_node = nodeGetNext(map,current_node);
     }
     /* Node with that key wasn't found. */
