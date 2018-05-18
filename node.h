@@ -5,6 +5,7 @@
 #include "map.h"
 typedef struct node_t *Node;
 
+/** Type used for returning error codes from map functions */
 typedef enum NodeResult_t {
     NODE_SUCCESS,
     NODE_OUT_OF_MEMORY,
@@ -20,10 +21,14 @@ Node NodeCreate(MapDataElement data, MapKeyElement key,
                 freeMapDataElements freeDataElement,
                 freeMapKeyElements freeKeyElement);
 
-MapKeyElement nodeGetKey(Node node);
-Node nodeGetNext(Node node);
+void nodeDestroy(Node node, freeMapDataElements freeDataElement,
+                 freeMapKeyElements freeKeyElement);
+
+MapKeyElement nodeGetKey(Node node, copyMapKeyElements copyKeyElement);
+Node nodeGetNext(Map map, Node node);
 NodeResult nodeSetNext(Node current, Node next);
-NodeResult nodeSetData(Node node,MapDataElement data,copyMapDataElements copyDataElement);
+NodeResult nodeSetData(Node node,MapDataElement data,
+                       copyMapDataElements copyDataElement);
 MapDataElement nodeGetData(Node node, copyMapDataElements copyDataElement);
 
 #endif //MTM_EX3_NODE_H

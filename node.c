@@ -2,13 +2,22 @@
 #include <malloc.h>
 #include <assert.h>
 
+
+//-----------------------------------------------------------------------//
+//                           STRUCT NODE                                 //
+//-----------------------------------------------------------------------//
+
 struct node_t{
     MapKeyElement key;
     MapDataElement data;
     Node next;
 };
 
-Node NodeCreate(MapDataElement data, MapKeyElement key,
+//-----------------------------------------------------------------------//
+//                        STRUCT NODE FUNCTIONS                          //
+//-----------------------------------------------------------------------//
+
+Node nodeCreate(MapDataElement data, MapKeyElement key,
                 copyMapDataElements copyDataElement,
                 copyMapKeyElements copyKeyElement,
                 freeMapDataElements freeDataElement,
@@ -31,10 +40,35 @@ Node NodeCreate(MapDataElement data, MapKeyElement key,
     return new_node;
 }
 
-MapKeyElement nodeGetKey(Node node){
-    assert(!node);
-    /* todo: check if need to return a copy */
-    return node->key;
+/**
+ ***** Function: nodeDestroy *****
+ * Description: Frees all allocated memory of the given node.
+ * @param node - a pointer to a node.
+ * @param freeDataElement - a pointer to a data destroy function.
+ * @param freeKeyElement - a pointer to a key destroy function.
+ * @return
+ */
+void nodeDestroy(Node node, freeMapDataElements freeDataElement,
+                       freeMapKeyElements freeKeyElement){
+    freeDataElement(node->data);
+    freeKeyElement(node->key);
+    free(node);
+}
+
+/**
+ ***** Function: nodeGetKey *****
+ * Description: Gets a node in the map and returns a copy of its key.
+ * Notice: The user is responsible for destroying the key.
+ * @param node - a pointer to a node.
+ * @param copyKeyElement - a pointer to a copy function of key element.
+ * @return - A copy of the node's key element.
+ */
+MapKeyElement nodeGetKey(Node node, copyMapKeyElements copyKeyElement){
+    if(!node){
+        return NULL;
+    }
+    MapKeyElement key_copy = copyKeyElement(node->key);
+    return key_copy;
 }
 
 MapDataElement nodeGetData(Node node,copyMapDataElements copyDataElement){
@@ -50,8 +84,17 @@ MapDataElement nodeGetData(Node node,copyMapDataElements copyDataElement){
     return data_copy;
 }
 
-Node nodeGetNext(Node node){
+/**
+ ***** Function: nodeGetNext *****
+ * Descritpion: Returns the a copy of the next node after given node.
+ * Notice: The user is responsible for destroying the copy.
+ * @param map - a pointer to a map.
+ * @param node - a pointer to a node.
+ * @return - Pointer to a copy of the node after the given node.
+ */
+Node nodeGetNext(Map map, Node node){
     /* todo: check if need to return a copy */
+    Node next_node =
     return node->next;
 }
 
@@ -73,3 +116,5 @@ NodeResult nodeSetData(Node node,MapDataElement data,copyMapDataElements copyDat
     return NODE_SUCCESS;
     //todo: what if data is NULL??
 }
+
+
