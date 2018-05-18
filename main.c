@@ -10,7 +10,7 @@ void* strCopy (void* string);
 void numberDestroy (void* number);
 void strDestroy (void* string);
 int isBigger (void* number1, void* number2);
-
+/*zoi*/
 int main() {
     Map map=mapCreate(strCopy,numberCopy,strDestroy,numberDestroy,isBigger);
     int temp=4;
