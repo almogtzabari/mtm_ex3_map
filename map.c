@@ -48,7 +48,8 @@ Map mapCreate(copyMapDataElements copyDataElement,
               compareMapKeyElements compareKeyElements){
 
     Map map = malloc(sizeof(*map));
-    if(!map){
+    if(!map || !copyDataElement || !copyKeyElement || !freeDataElement
+            || !freeKeyElement || !compareKeyElements){
         return NULL;
     }
     map->copyDataElement = copyDataElement;
@@ -126,6 +127,12 @@ MapResult mapPut(Map map, MapKeyElement keyElement,
  * @return - Next key in the map.
  */
 MapKeyElement mapGetNext(Map map){
+    if(!map){
+        return NULL;
+    }
+    if(!map->iterator){
+        return NULL;
+    }
     Node current_node = mapGetNodeByKey(map,map->iterator);
     if(!current_node){
         /* Empty map */
@@ -148,6 +155,9 @@ MapKeyElement mapGetNext(Map map){
  * @return - First key in the map.
  */
 MapKeyElement mapGetFirst(Map map){
+    if(!map){
+        return NULL;
+    }
     /* In case of empty map returns NULL.*/
     if(!map->list){
         return NULL;
@@ -165,7 +175,9 @@ MapKeyElement mapGetFirst(Map map){
  * @return
  */
 MapDataElement mapGet(Map map, MapKeyElement keyElement){
-    assert(keyElement);
+    if(!map || !keyElement){
+        return NULL;
+    }
     if (!mapContains(map,keyElement)){
         /*Key does not exists in map */
         return NULL;
@@ -206,7 +218,7 @@ bool mapContains(Map map, MapKeyElement element){
  * @param map - A pointer to map.
  */
 void mapDestroy(Map map){
-    if(map==NULL){
+    if(!map){
         return;
     }
     mapClear(map);
@@ -288,6 +300,9 @@ int mapGetSize(Map map){
  * 	MAP_SUCCESS the paired elements had been removed successfully
  */
 MapResult mapRemove(Map map, MapKeyElement keyElement){
+    if(!map || !keyElement){
+        return MAP_NULL_ARGUMENT;
+    }
     Node node = mapGetNodeByKey(map,keyElement);
     if(!node){
         /* Key element does not exist in map. */

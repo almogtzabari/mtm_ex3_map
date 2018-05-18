@@ -13,10 +13,13 @@ int isBigger (void* number1, void* number2);
 
 int main() {
     Map map=mapCreate(strCopy,numberCopy,strDestroy,numberDestroy,isBigger);
-    MapResult status;
     int temp=4;
-    char stringtoCopy [7]= "sababa";
-    status=mapPut(map,&temp,stringtoCopy);
+    int temp2=5;
+    char stringtoCopy [20]= "sababa";
+    char stringtoCopy2 [20]= "sababa egozim";
+    mapPut(map,&temp,stringtoCopy);
+    mapPut(map,&temp,stringtoCopy2);
+    printf("%s",(char*)mapGet(map,&temp));
     return 0;
 }
 
