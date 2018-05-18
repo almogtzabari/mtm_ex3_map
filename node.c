@@ -2,7 +2,6 @@
 #include <malloc.h>
 #include <assert.h>
 
-
 //-----------------------------------------------------------------------//
 //                           STRUCT NODE                                 //
 //-----------------------------------------------------------------------//
@@ -98,12 +97,32 @@ Node nodeGetNext(Map map, Node node){
     return node->next;
 }
 
-NodeResult nodeSetNext(Node current, Node next){
-    assert(!current);
-    current->next = next;
+/**
+ ***** Function: nodeSetNext *****
+ * Description: Gets node and next_node and sets node's 'next'
+ * to be next_node.
+ * @param node
+ * @param next_node
+ * @return - Status success/failure of function.
+ */
+NodeResult nodeSetNext(Node node, Node next_node){
+    if(!node){
+        return NODE_NULL_ARGUMENT;
+    }
+    node->next = next_node;
+    return NODE_SUCCESS;
 }
 
-NodeResult nodeSetData(Node node,MapDataElement data,copyMapDataElements copyDataElement){
+/**
+ ***** Function: nodeSetData *****
+ * Description:
+ * @param node
+ * @param data
+ * @param copyDataElement
+ * @return
+ */
+NodeResult nodeSetData(Node node,MapDataElement data,
+                       copyMapDataElements copyDataElement){
     assert(!node);
     if (!data){
         return NODE_NULL_ARGUMENT;
@@ -116,5 +135,4 @@ NodeResult nodeSetData(Node node,MapDataElement data,copyMapDataElements copyDat
     return NODE_SUCCESS;
     //todo: what if data is NULL??
 }
-
 

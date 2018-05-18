@@ -26,9 +26,12 @@ void nodeDestroy(Node node, freeMapDataElements freeDataElement,
 
 MapKeyElement nodeGetKey(Node node, copyMapKeyElements copyKeyElement);
 Node nodeGetNext(Map map, Node node);
-NodeResult nodeSetNext(Node current, Node next);
+NodeResult nodeSetNext(Node node, Node next_node);
 NodeResult nodeSetData(Node node,MapDataElement data,
                        copyMapDataElements copyDataElement);
 MapDataElement nodeGetData(Node node, copyMapDataElements copyDataElement);
+
+void nodeDestroy(Node node, freeMapDataElements freeDataElement,
+                 freeMapKeyElements freeKeyElement);
 
 #endif //MTM_EX3_NODE_H
