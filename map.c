@@ -9,7 +9,7 @@
 
 static Node mapNodeToPlaceBefore(Map map, MapKeyElement key);
 static Node mapGetNodeByKey(Map map,MapKeyElement key);
-static Node mapGetPreviousNode(Map map, Node next_node);
+static Node mapGetPreviousNode(Map map, Node node);
 
 //-----------------------------------------------------------------------//
 //                            STRUCT MAP                                 //
@@ -79,7 +79,7 @@ MapResult mapPut(Map map, MapKeyElement keyElement,
     if(!mapContains(map,keyElement)){
         /* Key element does not exists in map.
          * Creating a new node. */
-        Node new_node = NodeCreate(dataElement,keyElement,map->copyDataElement,
+        Node new_node = nodeCreate(dataElement,keyElement,map->copyDataElement,
                 map->copyKeyElement,map->freeDataElement,
                                map->freeKeyElement);
         if(!new_node){ // Node creation failed.
@@ -209,13 +209,7 @@ void mapDestroy(Map map){
     if(map==NULL){
         return;
     }
-    Node node_iterator = map->list, temp_node;
-    while(node_iterator){
-        temp_node = node_iterator;
-        node_iterator = nodeGetNext(node_iterator);
-        nodeDestroy(temp_node,map->freeDataElement,
-                    map->freeKeyElement);
-    }
+    mapClear(map);
     free(map);
 }
 
@@ -275,6 +269,68 @@ int mapGetSize(Map map){
     return map->mapSize;
 }
 
+/**
+ ***** Function: mapRemove *****
+ * Description: Removes a pair of key and data elements from the map.
+ * The elements are found using the comparison function given at
+ * initialization. Once found, the elements are removed and deallocated
+ * using the free functions supplied at initialzation.
+ *  Iterator's value is undefined after this operation.
+ * @param map - The map to remove the elements from.
+ * @param keyElement - The key element to find and remove from the map.
+ * The element will be freed using the free function given at
+ * initialization. The data element associated with this key will also be
+ * freed using the free function given at initialization.
+ * @return
+ * 	MAP_NULL_ARGUMENT if a NULL was sent to the function
+ *  MAP_ITEM_DOES_NOT_EXIST if an equal key item does not already exists in
+ *  the map
+ * 	MAP_SUCCESS the paired elements had been removed successfully
+ */
+MapResult mapRemove(Map map, MapKeyElement keyElement){
+    Node node = mapGetNodeByKey(map,keyElement);
+    if(!node){
+        /* Key element does not exist in map. */
+        map->iterator = NULL; // Resetting iterator.
+        return MAP_ITEM_DOES_NOT_EXIST;
+    }
+    Node previous_node = mapGetPreviousNode(map,node);
+    if(!previous_node){
+        /* Node with given key is first. */
+        map->list = nodeGetNext(node);
+        nodeDestroy(node,map->freeDataElement,map->freeKeyElement);
+        map->iterator = NULL; // Resetting iterator.
+        return MAP_SUCCESS;
+    }
+    nodeSetNext(previous_node,nodeGetNext(node));
+    nodeDestroy(node,map->freeDataElement,map->freeKeyElement);
+    map->iterator = NULL; // Resetting iterator.
+    return MAP_SUCCESS;
+}
+
+/**
+ ***** Function: mapClear *****
+ * Description: Removes all key and data elements from target map.
+ * The elements are deallocated using the stored free functions.
+ * @param map - Target map to remove all element from.
+ * @return
+ * 	MAP_NULL_ARGUMENT - if a NULL pointer was sent.
+ * 	MAP_SUCCESS - Otherwise.
+ */
+MapResult mapClear(Map map) {
+    if(!map){
+        return MAP_NULL_ARGUMENT;
+    }
+    Node node_iterator = map->list, temp_node;
+    while (node_iterator) {
+        temp_node = node_iterator;
+        node_iterator = nodeGetNext(node_iterator);
+        nodeDestroy(temp_node, map->freeDataElement,
+                    map->freeKeyElement);
+    }
+    return MAP_SUCCESS;
+}
+
 //-----------------------------------------------------------------------//
 //                        MAP STATIC FUNCTIONS                           //
 //-----------------------------------------------------------------------//
@@ -301,10 +357,13 @@ static Node mapNodeToPlaceBefore(Map map, MapKeyElement key){
 }
 
 /** Checked
- *
- * @param map
- * @param key
- * @return
+ ***** Function: mapGetNodeByKey *****
+ * Description: Gets a map and a key and returns the node of that key in
+ * the map.
+ * @param map - a pointer to a map.
+ * @param key - a pointer to the key that we wish to find its node in the
+ * map.
+ * @return - The node of that key in the map.
  */
 static Node mapGetNodeByKey(Map map,MapKeyElement key){
     assert(!key);
@@ -320,17 +379,25 @@ static Node mapGetNodeByKey(Map map,MapKeyElement key){
     /* Node with that key wasn't found. */
     return NULL;
 }
-/*Checked */
-static Node mapGetPreviousNode(Map map, Node next_node) {
+/** Checked
+ ***** Function: mapGetPreviousNode *****
+ * Description: Gets a map and a node and returns the node before the given
+ * node in the map. If the given node is first or the map is empty the
+ * function returns NULL.
+ * @param map - a pointer to a map.
+ * @param node - a pointer to the node we want to find its previous.
+ * @return - Returns the node before the given node in the map.
+ */
+static Node mapGetPreviousNode(Map map, Node node) {
     assert(!map);
     Node node_iterator;
     MAP_FOREACH(MapKeyElement, iterator, map) {
         node_iterator = mapGetNodeByKey(map, iterator);
-        if (nodeGetNext(node_iterator) == next_node) {
+        if (nodeGetNext(node_iterator) == node) {
             return node_iterator;
         }
     }
-    /* If we got here then map is empty or contains one node. */
+    /* If we got here then map is empty or the given node is first. */
     return NULL;
 }
 

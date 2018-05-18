@@ -15,7 +15,7 @@ typedef enum NodeResult_t {
 /** Data element data type for node container */
 typedef void* NodeDataElement;
 
-Node NodeCreate(MapDataElement data, MapKeyElement key,
+Node nodeCreate(MapDataElement data, MapKeyElement key,
                 copyMapDataElements copyDataElement,
                 copyMapKeyElements copyKeyElement,
                 freeMapDataElements freeDataElement,

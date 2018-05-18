@@ -16,6 +16,17 @@ struct node_t{
 //                        STRUCT NODE FUNCTIONS                          //
 //-----------------------------------------------------------------------//
 
+/** Checked
+ ***** Function: nodeCreate *****
+ * Description: Creates a new node.
+ * @param data - a pointer to data.
+ * @param key - a pointer to key.
+ * @param copyDataElement - a pointer to copy data function.
+ * @param copyKeyElement - a pointer to copy key function.
+ * @param freeDataElement - a pointer to destroy data function.
+ * @param freeKeyElement - a pointer to destroy key function.
+ * @return - A pointer to the new node.
+ */
 Node nodeCreate(MapDataElement data, MapKeyElement key,
                 copyMapDataElements copyDataElement,
                 copyMapKeyElements copyKeyElement,
@@ -23,15 +34,18 @@ Node nodeCreate(MapDataElement data, MapKeyElement key,
                 freeMapKeyElements freeKeyElement){
     Node new_node = malloc(sizeof(*new_node));
     if(!new_node){
+        /* Failed to allocate memory to node. */
         return NULL;
     }
     new_node->key = copyKeyElement(key);
     if(!new_node->key){
+        /* Failed to copy key. */
         free(new_node);
         return NULL;
     }
     new_node->data = copyDataElement(data);
     if(!new_node->data){
+        /* Failed to copy data. */
         free(new_node);
         freeKeyElement(new_node->key);
     }
@@ -39,7 +53,7 @@ Node nodeCreate(MapDataElement data, MapKeyElement key,
     return new_node;
 }
 
-/**
+/** Checked
  ***** Function: nodeDestroy *****
  * Description: Frees all allocated memory of the given node.
  * @param node - a pointer to a node.
@@ -54,7 +68,7 @@ void nodeDestroy(Node node, freeMapDataElements freeDataElement,
     free(node);
 }
 
-/**
+/** Checked
  ***** Function: nodeGetKey *****
  * Description: Gets a node in the map and returns node's key.
  * @param node - a pointer to a node.
@@ -101,7 +115,7 @@ Node nodeGetNext(Node node){
     return node->next;
 }
 
-/**
+/** Checked
  ***** Function: nodeSetNext *****
  * Description: Gets node and next_node and sets node's 'next'
  * to be next_node.
