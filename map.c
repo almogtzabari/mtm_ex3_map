@@ -7,7 +7,7 @@
 //                  DECLARATIONS OF STATIC FUNCTIONS                     //
 //-----------------------------------------------------------------------//
 
-static Node mapPutBefore(Map map, MapKeyElement key);
+static Node mapNodeToPlaceBefore(Map map, MapKeyElement key);
 static Node mapGetNodeByKey(Map map,MapKeyElement key);
 static Node mapGetPreviousNode(Map map, Node next_node);
 
@@ -60,7 +60,6 @@ Map mapCreate(copyMapDataElements copyDataElement,
     map->iterator = NULL;
     map->mapSize=0;
     return map;
-
 }
 
 /** Checked
@@ -86,13 +85,11 @@ MapResult mapPut(Map map, MapKeyElement keyElement,
         if(!new_node){ // Node creation failed.
             return MAP_OUT_OF_MEMORY;
         }
-        MapKeyElement key = nodeGetKey(new_node,map->copyKeyElement);
-        /* nodeGetKey creates a copy of key. */
-        Node after_node = mapPutBefore(map,key);
-        /* Next node is the node that suppose to be after the new node.
-         * If null, the new node should be placed at the end of the map. */
-        map->freeKeyElement(key); // Destroying key copy.
-        nodeSetNext(new_node,after_node); // new
+        MapKeyElement key = nodeGetKey(new_node);
+        Node after_node = mapNodeToPlaceBefore(map,key);
+        /* Next node is the node that supposed to be after the new node.
+         * In case of NULL, new node is the current last node.*/
+        nodeSetNext(new_node,after_node);
         Node before_node = mapGetPreviousNode(map,after_node);
         if(before_node){
             nodeSetNext(before_node,new_node);
@@ -220,13 +217,29 @@ Map mapCopy(Map map){
     if(!new_map){
         return NULL;
     }
-    MapDataElement current_node_data;
+    MapDataElement current_node_data_copy;
+    MapKeyElement current_node_key_copy;
     MapResult result;
     MAP_FOREACH(MapKeyElement,current_node_key,map){
-        current_node_data = mapGet(map,current_node_key);
-        result=mapPut(new_map,current_node_key,current_node_data);
-        map->freeDataElement(current_node_data); // Destroying data copy.
-        if(!result){
+        current_node_data_copy = mapGet(map,current_node_key);
+        if(!current_node_data_copy){
+            /*If mapGet failed */
+            mapDestroy(new_map);
+            map->iterator=NULL;
+            return NULL;
+        }
+        current_node_key_copy=map->copyKeyElement(current_node_key);
+        if (!current_node_key_copy){
+            /* If copyKeyElement failed */
+            map->freeDataElement(current_node_data_copy);
+            mapDestroy(new_map);
+            map->iterator=NULL;
+            return NULL;
+        }
+        result=mapPut(new_map,current_node_key_copy,current_node_data_copy);
+        if(result!=MAP_SUCCESS){
+            map->freeKeyElement(current_node_key_copy);
+            map->freeDataElement(current_node_data_copy);
             mapDestroy(new_map);
             map->iterator=NULL;
             return NULL;
@@ -256,7 +269,7 @@ int mapGetSize(Map map){
  * @return - Pointer to the node that should be placed after the node with
  * given key.
  */
-static Node mapPutBefore(Map map, MapKeyElement key){
+static Node mapNodeToPlaceBefore(Map map, MapKeyElement key){
     MAP_FOREACH(MapKeyElement,iterator,map) {
        if(map->compareKeyElements(iterator,key)==-1){
            continue;
@@ -275,25 +288,15 @@ static Node mapPutBefore(Map map, MapKeyElement key){
  * @return
  */
 static Node mapGetNodeByKey(Map map,MapKeyElement key){
-    if(!key){
-        return NULL;
-    }
+    assert(!key);
     Node current_node = map->list; // Resetting to first node.
     MapKeyElement current_node_key;
     while(current_node) {
-        /* Creates a copy of node's key. */
-        current_node_key = nodeGetKey(current_node,map->copyKeyElement);
-        if(!current_node_key){
-            /* copy function might fail and return null */
-            return NULL;
-        }
+        current_node_key = nodeGetKey(current_node);
         if (map->compareKeyElements(current_node_key, key) == 0){
-            /*  */
-            map->freeKeyElement(current_node_key); // Destroying key copy.
             return current_node;
         }
-        map->freeKeyElement(current_node_key); // Destroying key copy.
-        current_node = nodeGetNext(map,current_node);
+        current_node = nodeGetNext(current_node);
     }
     /* Node with that key wasn't found. */
     return NULL;

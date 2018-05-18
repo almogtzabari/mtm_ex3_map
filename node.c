@@ -61,9 +61,7 @@ void nodeDestroy(Node node, freeMapDataElements freeDataElement,
  * @return - Node's key element.
  */
 MapKeyElement nodeGetKey(Node node){
-    if(!node){
-        return NULL;
-    }
+    assert(!node);
     return node->key;
 }
 
