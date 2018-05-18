@@ -56,8 +56,8 @@ void nodeDestroy(Node node, freeMapDataElements freeDataElement,
 
 /**
  ***** Function: nodeGetKey *****
- * Description: Gets a node in the map and returns a copy of its key.
- * Notice: The user is responsible for destroying the key.
+ * Description: Gets a node in the map and returns a copy of node's key.
+ * Notice: The user is responsible for destroying the key copy.
  * @param node - a pointer to a node.
  * @param copyKeyElement - a pointer to a copy function of key element.
  * @return - A copy of the node's key element.
@@ -70,23 +70,39 @@ MapKeyElement nodeGetKey(Node node, copyMapKeyElements copyKeyElement){
     return key_copy;
 }
 
+/**
+ ***** Function: nodeGetData *****
+ * Description: Gets a node and a copy data function and returns a copy of
+ * node's data element.
+ * Notice: User is responsible for destroying the data copy.
+ * @param node - a pointer to a node.
+ * @param copyDataElement - a pointer to a copy function of the data.
+ * @return - A pointer to a copy of node's data.
+ */
 MapDataElement nodeGetData(Node node,copyMapDataElements copyDataElement){
-    assert(!node);
-    if(!node->data){
+    if(!node){
+        /* Node is NULL. */
         return NULL;
     }
-    /* todo: check if need to return a copy */
-    MapDataElement data_copy=copyDataElement(node->data);
+    if(!(node->data)){
+        /* Node data is NULL. */
+        return NULL;
+    }
+    /* Creating a copy of the node's data. */
+    MapDataElement data_copy = copyDataElement(node->data);
     if(!data_copy){
+        /* Failed to create a copy. */
         return NULL;
     }
+    /* Copy succeeded. */
     return data_copy;
 }
 
 /**
  ***** Function: nodeGetNext *****
- * Descritpion: Returns the a copy of the next node after given node.
- * Notice: The user is responsible for destroying the copy.
+ * Descritpion: Returns a copy of the next node (the node after the
+ * given node).
+ * Notice: User is responsible for destroying the node copy.
  * @param map - a pointer to a map.
  * @param node - a pointer to a node.
  * @return - Pointer to a copy of the node after the given node.
@@ -115,24 +131,56 @@ NodeResult nodeSetNext(Node node, Node next_node){
 
 /**
  ***** Function: nodeSetData *****
- * Description:
- * @param node
- * @param data
- * @param copyDataElement
+ * Description: The function gets a node and a new data and creates a copy
+ * of the data. The copy of the new data will be inserted to node's data.
+ * Notice: Node's old data will be destroyed.
+ * @param node - a pointer to the node which we want to modify its data.
+ * @param new_data - a pointer to the new data.
+ * @param copyDataElement - a pointer to the copy data function.
  * @return
  */
-NodeResult nodeSetData(Node node,MapDataElement data,
-                       copyMapDataElements copyDataElement){
+NodeResult nodeSetData(Node node, MapDataElement new_data,
+                       copyMapDataElements copyDataElement,
+                       freeMapDataElements freeDataElement){
     assert(!node);
-    if (!data){
+    if (!new_data){
+        /* New data is NULL. */
         return NODE_NULL_ARGUMENT;
     }
-    MapDataElement data_copy =copyDataElement(data);
+    /* Creating a copy of the new Data*/
+    MapDataElement data_copy = copyDataElement(new_data);
     if(!data_copy){
+        /* Couldn't create the data copy. */
         return NODE_OUT_OF_MEMORY;
     }
-    node->data=data_copy;
+    /* New data copy created successfully. */
+    freeDataElement(node->data); // Destroying old data.
+    node->data = data_copy;
     return NODE_SUCCESS;
-    //todo: what if data is NULL??
+    //todo: what if new_data is NULL??
+}
+
+/**
+ ***** Function: nodeCopy *****
+ * Description: Gets a node and freeing&copying functions of key and data,
+ * and returns a copy of that node.
+ * Notice: The copy of the node has the same key&data but it's next is set
+ * to NULL! Also, if the function fails a NULL pointer will be returned.
+ * @param node - a pointer to the node we want to copy.
+ * @param copyDataElement - data copy function.
+ * @param copyKeyElement - key copy function.
+ * @param freeDataElement - data destroy function.
+ * @param freeKeyElement - key destroy function.
+ * @return - A copy of the given node.
+ */
+Node nodeCopy(Node node, copyMapDataElements copyDataElement,
+              copyMapKeyElements copyKeyElement,
+              freeMapDataElements freeDataElement,
+              freeMapKeyElements freeKeyElement,){
+    /* Creating a new node with the same key&data. */
+    Node node_copy = nodeCreate(node->data,node->key, copyDataElement,
+            copyKeyElement,freeDataElement,freeKeyElement);
+    return node_copy;
+
 }
 
