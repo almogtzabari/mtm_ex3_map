@@ -74,7 +74,7 @@ Map mapCreate(copyMapDataElements copyDataElement,
  */
 MapResult mapPut(Map map, MapKeyElement keyElement,
                  MapDataElement dataElement){
-    if(!map){
+    if(!map || !keyElement || !dataElement){ // todo: Check what we need to do in case key \ data is null.
         return MAP_NULL_ARGUMENT;
     }
     if(!mapContains(map,keyElement)){
