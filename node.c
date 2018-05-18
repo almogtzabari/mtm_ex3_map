@@ -75,7 +75,7 @@ void nodeDestroy(Node node, freeMapDataElements freeDataElement,
  * @return - Node's key element.
  */
 MapKeyElement nodeGetKey(Node node){
-    assert(!node);
+    assert(node);
     return node->key;
 }
 
@@ -145,7 +145,7 @@ NodeResult nodeSetNext(Node node, Node next_node){
 NodeResult nodeSetData(Node node, MapDataElement new_data,
                        copyMapDataElements copyDataElement,
                        freeMapDataElements freeDataElement){
-    assert(!node);
+    assert(node);
     if (!new_data){
         /* New data is NULL. */
         return NODE_NULL_ARGUMENT;
