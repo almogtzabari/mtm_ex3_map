@@ -63,7 +63,7 @@ Map mapCreate(copyMapDataElements copyDataElement,
 
 }
 
-/**
+/** Checked
  ****** Function: mapPut *****
  * Description: Gives a specific key a given value.
  * If the key exists, the value is overridden.
@@ -189,10 +189,9 @@ bool mapContains(Map map, MapKeyElement element){
     if(!map || !element){
         return false;
     }
-    Node node=mapGetNodeByKey(map,element);
+    Node node = mapGetNodeByKey(map,element);
     if(!node){
-        /*If the key doesn't exist/memory allocation error mapGetNodeByKey
-         * return's Null */
+        /*If the key doesn't exist return's Null */
         return false;
     }
     /*If we got here, the key exists*/
@@ -248,7 +247,7 @@ int mapGetSize(Map map){
 //                        MAP STATIC FUNCTIONS                           //
 //-----------------------------------------------------------------------//
 
-/**
+/** Checked.
  ***** Static function: mapPutBefore *****
  * Description: Gets a map and a key and returns a pointer to the node
  * that should be placed after the node with the given key.
@@ -269,7 +268,12 @@ static Node mapPutBefore(Map map, MapKeyElement key){
     return NULL;
 }
 
-
+/**
+ * 
+ * @param map
+ * @param key
+ * @return
+ */
 static Node mapGetNodeByKey(Map map,MapKeyElement key){
     if(!key){
         return NULL;
@@ -294,17 +298,17 @@ static Node mapGetNodeByKey(Map map,MapKeyElement key){
     /* Node with that key wasn't found. */
     return NULL;
 }
-
-static Node mapGetPreviousNode(Map map, Node next_node){
+/*Checked */
+static Node mapGetPreviousNode(Map map, Node next_node) {
     assert(!map);
-    Node node_iterator = map->list;
-    while(!node_iterator){
-        if(nodeGetNext(node_iterator) == next_node){
+    Node node_iterator;
+    MAP_FOREACH(MapKeyElement, iterator, map) {
+        node_iterator = mapGetNodeByKey(map, iterator);
+        if (nodeGetNext(node_iterator) == next_node) {
             return node_iterator;
         }
-        node_iterator = nodeGetNext(node_iterator);
     }
-    /* If we got here then map is empty. */
+    /* If we got here then map is empty or contains one node. */
     return NULL;
 }
 
