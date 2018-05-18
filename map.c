@@ -129,7 +129,7 @@ MapKeyElement mapGetNext(Map map){
     if(!current_node){
         return NULL;
     }
-    Node next_node = nodeGetNext(current_node);
+    Node next_node = nodeGetNext(current_node); // todo: problem!
     if(!next_node){
         return NULL;
     }

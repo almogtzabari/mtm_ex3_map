@@ -107,7 +107,10 @@ MapDataElement nodeGetData(Node node,copyMapDataElements copyDataElement){
  * @param node - a pointer to a node.
  * @return - Pointer to a copy of the node after the given node.
  */
-Node nodeGetNext(Map map, Node node){
+Node nodeGetNext(Map map, Node node,copyMapDataElements copyDataElement,
+                 copyMapKeyElements copyKeyElement,
+                 freeMapDataElements freeDataElement,
+                 freeMapKeyElements freeKeyElement){
     /* todo: check if need to return a copy */
     Node next_node =
     return node->next;
@@ -123,6 +126,7 @@ Node nodeGetNext(Map map, Node node){
  */
 NodeResult nodeSetNext(Node node, Node next_node){
     if(!node){
+        /* Node is NULL. */
         return NODE_NULL_ARGUMENT;
     }
     node->next = next_node;
@@ -176,7 +180,7 @@ NodeResult nodeSetData(Node node, MapDataElement new_data,
 Node nodeCopy(Node node, copyMapDataElements copyDataElement,
               copyMapKeyElements copyKeyElement,
               freeMapDataElements freeDataElement,
-              freeMapKeyElements freeKeyElement,){
+              freeMapKeyElements freeKeyElement){
     /* Creating a new node with the same key&data. */
     Node node_copy = nodeCreate(node->data,node->key, copyDataElement,
             copyKeyElement,freeDataElement,freeKeyElement);
