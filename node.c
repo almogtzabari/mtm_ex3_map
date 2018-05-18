@@ -56,18 +56,15 @@ void nodeDestroy(Node node, freeMapDataElements freeDataElement,
 
 /**
  ***** Function: nodeGetKey *****
- * Description: Gets a node in the map and returns a copy of node's key.
- * Notice: The user is responsible for destroying the key copy.
+ * Description: Gets a node in the map and returns node's key.
  * @param node - a pointer to a node.
- * @param copyKeyElement - a pointer to a copy function of key element.
- * @return - A copy of the node's key element.
+ * @return - Node's key element.
  */
-MapKeyElement nodeGetKey(Node node, copyMapKeyElements copyKeyElement){
+MapKeyElement nodeGetKey(Node node){
     if(!node){
         return NULL;
     }
-    MapKeyElement key_copy = copyKeyElement(node->key);
-    return key_copy;
+    return node->key;
 }
 
 /**
@@ -100,11 +97,11 @@ MapDataElement nodeGetData(Node node,copyMapDataElements copyDataElement){
 
 /**
  ***** Function: nodeGetNext *****
- * Descritpion: Returns a copy of the next node (the node after the
+ * Descritpion: Returns the next node (the node after the
  * given node).
  * @param map - a pointer to a map.
  * @param node - a pointer to a node.
- * @return - Pointer to a copy of the node after the given node.
+ * @return - Pointer to the node after the given node.
  */
 Node nodeGetNext(Node node){
     return node->next;
