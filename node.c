@@ -65,7 +65,7 @@ MapKeyElement nodeGetKey(Node node){
     return node->key;
 }
 
-/**
+/** Checked
  ***** Function: nodeGetData *****
  * Description: Gets a node and a copy data function and returns a copy of
  * node's data element.
@@ -85,15 +85,11 @@ MapDataElement nodeGetData(Node node,copyMapDataElements copyDataElement){
     }
     /* Creating a copy of the node's data. */
     MapDataElement data_copy = copyDataElement(node->data);
-    if(!data_copy){
-        /* Failed to create a copy. */
-        return NULL;
-    }
-    /* Copy succeeded. */
+     /* If copyDataElement failed data_copy will be NULL. */
     return data_copy;
 }
 
-/**
+/** Checked
  ***** Function: nodeGetNext *****
  * Descritpion: Returns the next node (the node after the
  * given node).
@@ -122,7 +118,7 @@ NodeResult nodeSetNext(Node node, Node next_node){
     return NODE_SUCCESS;
 }
 
-/**
+/** Checked
  ***** Function: nodeSetData *****
  * Description: The function gets a node and a new data and creates a copy
  * of the data. The copy of the new data will be inserted to node's data.
@@ -152,27 +148,4 @@ NodeResult nodeSetData(Node node, MapDataElement new_data,
     return NODE_SUCCESS;
 }
 
-/**
- ***** Function: nodeCopy *****
- * Description: Gets a node and freeing&copying functions of key and data,
- * and returns a copy of that node.
- * Notice: The copy of the node has the same key&data but it's next is set
- * to NULL! Also, if the function fails a NULL pointer will be returned.
- * @param node - a pointer to the node we want to copy.
- * @param copyDataElement - data copy function.
- * @param copyKeyElement - key copy function.
- * @param freeDataElement - data destroy function.
- * @param freeKeyElement - key destroy function.
- * @return - A copy of the given node.
- */
-Node nodeCopy(Node node, copyMapDataElements copyDataElement,
-              copyMapKeyElements copyKeyElement,
-              freeMapDataElements freeDataElement,
-              freeMapKeyElements freeKeyElement){
-    /* Creating a new node with the same key&data. */
-    Node node_copy = nodeCreate(node->data,node->key, copyDataElement,
-            copyKeyElement,freeDataElement,freeKeyElement);
-    return node_copy;
-
-}
 

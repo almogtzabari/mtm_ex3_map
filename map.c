@@ -29,7 +29,7 @@ struct Map_t{
 //                         STRUCT MAP FUNCTIONS                          //
 //-----------------------------------------------------------------------//
 
-/**
+/** Checked
  ***** Function: mapCreate *****
  * Description: Creates a new empty map.
  * @param copyDataElement - a pointer to a copy function of data elements.
@@ -108,7 +108,7 @@ MapResult mapPut(Map map, MapKeyElement keyElement,
      * data. */
     map->iterator = NULL; // Resetting iterator.
     NodeResult result = nodeSetData(mapGetNodeByKey(map,keyElement)
-            ,dataElement,map->copyDataElement); // Modify data of key.
+            ,dataElement,map->copyDataElement,map->freeDataElement); // Modify data of key.
 
     if(result!=NODE_SUCCESS){
         /* Couldn't create a copy of the new data.
@@ -118,7 +118,7 @@ MapResult mapPut(Map map, MapKeyElement keyElement,
     return MAP_SUCCESS;
 }
 
-/**
+/** Checked
  ***** Function: mapGetNext *****
  * Description: Advances the internal iterator to the next key and returns
  * it.
@@ -127,19 +127,20 @@ MapResult mapPut(Map map, MapKeyElement keyElement,
  */
 MapKeyElement mapGetNext(Map map){
     Node current_node = mapGetNodeByKey(map,map->iterator);
-    /* In case of empty map returns NULL. todo: check if that is ok.*/
     if(!current_node){
+        /* Empty map */
         return NULL;
     }
-    Node next_node = nodeGetNext(current_node); // todo: problem!
+    Node next_node = nodeGetNext(current_node);
     if(!next_node){
+        /* Current node is the last node  */
         return NULL;
     }
     map->iterator = nodeGetKey(next_node);
     return map->iterator;
 }
 
-/**
+/** Checked
  ***** Function: mapGetFirst *****
  * Description: Sets the internal iterator to the first key in the map,
  * and returns it.
@@ -147,7 +148,7 @@ MapKeyElement mapGetNext(Map map){
  * @return - First key in the map.
  */
 MapKeyElement mapGetFirst(Map map){
-    /* In case of empty map returns NULL. todo: check if that is ok.*/
+    /* In case of empty map returns NULL.*/
     if(!map->list){
         return NULL;
     }
@@ -155,7 +156,7 @@ MapKeyElement mapGetFirst(Map map){
     return map->iterator;
 }
 
-/**
+/** Checked
  ***** Function: mapGet *****
  * Description: Returns the data paired to a key which matches the given
  * key. Iterator status unchanged.
@@ -166,15 +167,19 @@ MapKeyElement mapGetFirst(Map map){
 MapDataElement mapGet(Map map, MapKeyElement keyElement){
     assert(!keyElement);
     if (!mapContains(map,keyElement)){
+        /*Key does not exists in map */
         return NULL;
     }
-    Node current_node=mapGetNodeByKey(map,keyElement);
-    MapDataElement current_node_data=nodeGetData(current_node,map->copyDataElement);
+    Node current_node = mapGetNodeByKey(map,keyElement);
+    assert(!current_node);
+    MapDataElement current_node_data=nodeGetData
+            (current_node,map->copyDataElement);
     map->iterator=NULL;
+    /* Current_node_data will be NULL if copyDataElement failed*/
     return current_node_data;
 }
 
-/**
+/** Checked
  ***** Function: mapContaints *****
  * Description: Returns weather or not a key exists in the map.
  * This resets the internal iterator.
@@ -195,18 +200,33 @@ bool mapContains(Map map, MapKeyElement element){
     return true;
 }
 
+/** Checked
+ ***** Function: mapDestroy *****
+ * Description: destroys all map's resources and the pointer to map.
+ * @param map - A pointer to map.
+ */
 void mapDestroy(Map map){
     if(map==NULL){
         return;
     }
-    MAP_FOREACH(MapKeyElement,iterator,map){
-        nodeDestroy(mapGetNodeByKey(map,iterator),
-                    map->freeDataElement,map->freeKeyElement);
+    Node node_iterator = map->list, temp_node;
+    while(node_iterator){
+        temp_node = node_iterator;
+        node_iterator = nodeGetNext(node_iterator);
+        nodeDestroy(temp_node,map->freeDataElement,
+                    map->freeKeyElement);
     }
     free(map);
 }
 
-
+/** Checked
+ ***** Function: mapCopy *****
+ * Description: Creates a copy of target map.
+ * Iterator values for both maps is undefined after this operation.
+ * @param map - A pointer to map.
+ * @return - NULL in case of failure, else returns a pointer to a copy of
+ * the map.
+ */
 Map mapCopy(Map map){
     if(!map){
         return NULL;
@@ -218,37 +238,36 @@ Map mapCopy(Map map){
         return NULL;
     }
     MapDataElement current_node_data_copy;
-    MapKeyElement current_node_key_copy;
     MapResult result;
     MAP_FOREACH(MapKeyElement,current_node_key,map){
         current_node_data_copy = mapGet(map,current_node_key);
         if(!current_node_data_copy){
-            /*If mapGet failed */
+            /* Failed to copy data */
             mapDestroy(new_map);
             map->iterator=NULL;
             return NULL;
         }
-        current_node_key_copy=map->copyKeyElement(current_node_key);
-        if (!current_node_key_copy){
-            /* If copyKeyElement failed */
-            map->freeDataElement(current_node_data_copy);
-            mapDestroy(new_map);
-            map->iterator=NULL;
-            return NULL;
-        }
-        result=mapPut(new_map,current_node_key_copy,current_node_data_copy);
+        result=mapPut(new_map,current_node_key,current_node_data_copy);
         if(result!=MAP_SUCCESS){
-            map->freeKeyElement(current_node_key_copy);
             map->freeDataElement(current_node_data_copy);
             mapDestroy(new_map);
             map->iterator=NULL;
             return NULL;
         }
+        map->freeDataElement(current_node_data_copy);
     }
     map->iterator=NULL;
     return new_map;
 }
 
+/** Checked
+ ***** Function: mapGetSize *****
+ * Description: Returns the number of elements in a map
+ * @param map - The map which size is requested
+ * @return
+ * 	-1 if a NULL pointer was sent.
+ * 	Otherwise the number of elements in the map.
+ */
 int mapGetSize(Map map){
     if(!map){
         return -1;
@@ -281,8 +300,8 @@ static Node mapNodeToPlaceBefore(Map map, MapKeyElement key){
     return NULL;
 }
 
-/**
- * 
+/** Checked
+ *
  * @param map
  * @param key
  * @return

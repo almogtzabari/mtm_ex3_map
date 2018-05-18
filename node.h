@@ -27,8 +27,9 @@ void nodeDestroy(Node node, freeMapDataElements freeDataElement,
 MapKeyElement nodeGetKey(Node node);
 Node nodeGetNext(Node node);
 NodeResult nodeSetNext(Node node, Node next_node);
-NodeResult nodeSetData(Node node,MapDataElement new_data,
-                       copyMapDataElements copyDataElement);
+NodeResult nodeSetData(Node node, MapDataElement new_data,
+                       copyMapDataElements copyDataElement,
+                       freeMapDataElements freeDataElement);
 MapDataElement nodeGetData(Node node, copyMapDataElements copyDataElement);
 
 void nodeDestroy(Node node, freeMapDataElements freeDataElement,
