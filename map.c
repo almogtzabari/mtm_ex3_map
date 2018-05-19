@@ -30,18 +30,25 @@ struct Map_t{
 //                         STRUCT MAP FUNCTIONS                          //
 //-----------------------------------------------------------------------//
 
-/** Checked
+/**
  ***** Function: mapCreate *****
- * Description: Creates a new empty map.
- * @param copyDataElement - a pointer to a copy function of data elements.
- * @param copyKeyElement - a pointer to a copy function of key elements.
- * @param freeDataElement - a pointer to a destroy function of data
- * elements.
- * @param freeKeyElement - a pointer to a destroy function of key elements.
- * @param compareKeyElements - a pointer to a compare function of
- * key elements.
- * @return - A pointer to a new map if function succeeded, else NULL.
- */
+* Description: Allocates a new empty map.
+*
+* @param copyDataElement - Function pointer to be used for copying data
+* elements into the map or when copying the map.
+* @param copyKeyElement - Function pointer to be used for copying key
+* elements into the map or when copying the map.
+* @param freeDataElement - Function pointer to be used for removing data
+* elements from the map.
+* @param freeKeyElement - Function pointer to be used for removing key
+* elements from the map.
+* @param compareKeyElements - Function pointer to be used for comparing key
+* elements inside the map. Used to check if new elements already exist
+* in the map.
+* @return
+* 	NULL - if one of the parameters is NULL or allocations failed.
+* 	A new Map in case of success.
+*/
 Map mapCreate(copyMapDataElements copyDataElement,
               copyMapKeyElements copyKeyElement,
               freeMapDataElements freeDataElement,
@@ -64,30 +71,38 @@ Map mapCreate(copyMapDataElements copyDataElement,
     return map;
 }
 
-/** Checked
- ****** Function: mapPut *****
- * Description: Gives a specific key a given value.
- * If the key exists, the value is overridden.
- * @param map - a pointer to a map.
- * @param keyElement - a pointer to a key element.
- * @param dataElement - a pointer to a data element.
- * @return - Success/failure of the function.
- */
+/**
+****** Function: mapPut *****
+* Description: Gives a specific key a given value.
+* If the key exists, the value is overridden.
+* @param map - The map for which to reassign the data element.
+* @param keyElement - The key element which need to be reassigned.
+* @param dataElement- The new data element to associate with the given key.
+* A copy of the element will be inserted as supplied by the copying
+* function which is given at initialization and old data memory would be
+* deleted using the free function given at initialization.
+* @return
+*  	MAP_NULL_ARGUMENT if a NULL was sent as map
+* 	MAP_OUT_OF_MEMORY if an allocation failed (Meaning the function for copying
+* 	an element failed)
+* 	MAP_SUCCESS the paired elements had been inserted successfully
+*/
 MapResult mapPut(Map map, MapKeyElement keyElement,
                  MapDataElement dataElement){
     if(!map){
         return MAP_NULL_ARGUMENT;
     }
-    if(!keyElement || !dataElement){ // todo: Check what we need to do in case key \ data is null.
+    if(!keyElement || !dataElement){
         map->iterator = NULL;
         return MAP_NULL_ARGUMENT;
     }
     if(!mapContains(map,keyElement)){
         /* Key element does not exists in map.
          * Creating a new node. */
-        Node new_node = nodeCreate(dataElement,keyElement,map->copyDataElement,
-                map->copyKeyElement,map->freeDataElement,
-                               map->freeKeyElement);
+        Node new_node = nodeCreate(dataElement,keyElement,
+                map->copyDataElement,map->copyKeyElement,
+                                   map->freeDataElement,
+                                   map->freeKeyElement);
         if(!new_node){ // Node creation failed.
             map->iterator = NULL;
             return MAP_OUT_OF_MEMORY;
@@ -114,8 +129,9 @@ MapResult mapPut(Map map, MapKeyElement keyElement,
     /* If we got here, the key already exists and we need to modify its
      * data. */
     map->iterator = NULL; // Resetting iterator.
+    // Modify data of key.
     NodeResult result = nodeSetData(mapGetNodeByKey(map,keyElement)
-            ,dataElement,map->copyDataElement,map->freeDataElement); // Modify data of key.
+            ,dataElement,map->copyDataElement,map->freeDataElement);
 
     if(result!=NODE_SUCCESS){
         /* Couldn't create a copy of the new data.
@@ -146,7 +162,7 @@ MapKeyElement mapGetNext(Map map){
     }
     Node next_node = nodeGetNext(current_node);
     if(!next_node){
-        /* Current node is the last node  */
+        /* Current node is the last node */
         return NULL;
     }
     map->iterator = nodeGetKey(next_node);
@@ -154,12 +170,12 @@ MapKeyElement mapGetNext(Map map){
 }
 
 /** Checked
- ***** Function: mapGetFirst *****
- * Description: Sets the internal iterator to the first key in the map,
- * and returns it.
- * @param map - a pointer to a map.
- * @return - First key in the map.
- */
+***** Function: mapGetFirst *****
+* Description: Sets the internal iterator to the first key in the map,
+* and returns it.
+* @param map - a pointer to a map.
+* @return - First key in the map.
+*/
 MapKeyElement mapGetFirst(Map map){
     if(!map){
         return NULL;
@@ -173,13 +189,17 @@ MapKeyElement mapGetFirst(Map map){
 }
 
 /** Checked
- ***** Function: mapGet *****
- * Description: Returns the data paired to a key which matches the given
- * key. Iterator status unchanged.
- * @param map
- * @param keyElement
- * @return
- */
+***** Function: mapGet *****
+* Description: Returns the data paired to a key which matches the given
+* key.
+* Iterator status unchanged.
+* @param map - The map for which to get the data element from.
+* @param keyElement - The key element which need to be found and whos data
+we want to get.
+* @return
+*   NULL if a NULL pointer was sent or if the map does not contain the requested key.
+* 	The data element associated with the key otherwise.
+*/
 MapDataElement mapGet(Map map, MapKeyElement keyElement){
     if(!map || !keyElement){
         return NULL;
@@ -191,18 +211,24 @@ MapDataElement mapGet(Map map, MapKeyElement keyElement){
     }
     assert(current_node);
     MapDataElement current_node_data = nodeGetData
-            (current_node,map->copyDataElement); // todo: bugged!!
+            (current_node,map->copyDataElement);
     /* Current_node_data will be NULL if copyDataElement failed*/
     return current_node_data;
 }
 
-/** Checked
+/**
  ***** Function: mapContaints *****
- * Description: Returns weather or not a key exists in the map.
- * This resets the internal iterator.
- * @param map
- * @param element
+ * Description: Checks if a key element exists in the map. The key element
+ * will be considered in the map if one of the key elements in the map it
+ * determined equal using the comparison function used to initialize the
+ * map.
+ * @param map - The map to search in.
+ * @param element - The element to look for. Will be compared using the
+ * comparison function.
  * @return
+ * 	false - if one or more of the inputs is null, or if the key element was
+ * 	not found.
+ * 	true - if the key element was found in the map.
  */
 bool mapContains(Map map, MapKeyElement element){
     if(!map){
@@ -223,9 +249,10 @@ bool mapContains(Map map, MapKeyElement element){
     return true;
 }
 
-/** Checked
+/**
  ***** Function: mapDestroy *****
- * Description: destroys all map's resources and the pointer to map.
+ * Description: Deallocates an existing map. Clears all elements by using
+ * the stored free functions.
  * @param map - A pointer to map.
  */
 void mapDestroy(Map map){
@@ -240,9 +267,10 @@ void mapDestroy(Map map){
  ***** Function: mapCopy *****
  * Description: Creates a copy of target map.
  * Iterator values for both maps is undefined after this operation.
- * @param map - A pointer to map.
- * @return - NULL in case of failure, else returns a pointer to a copy of
- * the map.
+ * @param map - Target map.
+ * @return
+ * 	NULL if a NULL was sent or a memory allocation failed.
+ * 	A Map containing the same elements as map otherwise.
  */
 Map mapCopy(Map map){
     if(!map){
@@ -252,11 +280,13 @@ Map mapCopy(Map map){
                           map->freeDataElement,map->freeKeyElement,
                           map->compareKeyElements);
     if(!new_map){
+        map->iterator=NULL;
         return NULL;
     }
     MapDataElement current_node_data_copy;
     MapResult result;
     MAP_FOREACH(MapKeyElement,current_node_key,map){
+        /* mapGet creates a copy of the current node data */
         current_node_data_copy = mapGet(map,current_node_key);
         if(!current_node_data_copy){
             /* Failed to copy data */
@@ -271,13 +301,14 @@ Map mapCopy(Map map){
             map->iterator=NULL;
             return NULL;
         }
+        /* Finished using current node data copy, frees it */
         map->freeDataElement(current_node_data_copy);
     }
     map->iterator = NULL; // Resetting iterator.
     return new_map;
 }
 
-/** Checked
+/**
  ***** Function: mapGetSize *****
  * Description: Returns the number of elements in a map
  * @param map - The map which size is requested
