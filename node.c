@@ -1,6 +1,7 @@
 #include "node.h"
 #include <malloc.h>
 #include <assert.h>
+#include <stdio.h>
 
 //-----------------------------------------------------------------------//
 //                           STRUCT NODE                                 //
@@ -79,7 +80,7 @@ MapKeyElement nodeGetKey(Node node){
     return node->key;
 }
 
-/** Checked
+/** todo: fix bug!
  ***** Function: nodeGetData *****
  * Description: Gets a node and a copy data function and returns a copy of
  * node's data element.
@@ -98,7 +99,7 @@ MapDataElement nodeGetData(Node node,copyMapDataElements copyDataElement){
         return NULL;
     }
     /* Creating a copy of the node's data. */
-    MapDataElement data_copy = copyDataElement(node->data);
+    MapDataElement data_copy = copyDataElement(node->data); //todo: bug is here!
      /* If copyDataElement failed data_copy will be NULL. */
     return data_copy;
 }

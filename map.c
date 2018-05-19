@@ -2,6 +2,7 @@
 #include "node.h"
 #include <malloc.h>
 #include <assert.h>
+#include <stdio.h>
 
 //-----------------------------------------------------------------------//
 //                  DECLARATIONS OF STATIC FUNCTIONS                     //
@@ -75,6 +76,7 @@ Map mapCreate(copyMapDataElements copyDataElement,
 MapResult mapPut(Map map, MapKeyElement keyElement,
                  MapDataElement dataElement){
     if(!map || !keyElement || !dataElement){ // todo: Check what we need to do in case key \ data is null.
+        map->iterator = NULL;
         return MAP_NULL_ARGUMENT;
     }
     if(!mapContains(map,keyElement)){
@@ -84,6 +86,7 @@ MapResult mapPut(Map map, MapKeyElement keyElement,
                 map->copyKeyElement,map->freeDataElement,
                                map->freeKeyElement);
         if(!new_node){ // Node creation failed.
+            map->iterator = NULL;
             return MAP_OUT_OF_MEMORY;
         }
         MapKeyElement key = nodeGetKey(new_node);
@@ -178,15 +181,14 @@ MapDataElement mapGet(Map map, MapKeyElement keyElement){
     if(!map || !keyElement){
         return NULL;
     }
-    if (!mapContains(map,keyElement)){
-        /*Key does not exists in map */
+    Node current_node = mapGetNodeByKey(map,keyElement);
+    if(!current_node){
+        /* Key does not exist. */
         return NULL;
     }
-    Node current_node = mapGetNodeByKey(map,keyElement);
     assert(current_node);
-    MapDataElement current_node_data=nodeGetData
-            (current_node,map->copyDataElement);
-    map->iterator=NULL;
+    MapDataElement current_node_data = nodeGetData
+            (current_node,map->copyDataElement); // todo: bugged!!
     /* Current_node_data will be NULL if copyDataElement failed*/
     return current_node_data;
 }
@@ -201,14 +203,17 @@ MapDataElement mapGet(Map map, MapKeyElement keyElement){
  */
 bool mapContains(Map map, MapKeyElement element){
     if(!map || !element){
+        map->iterator = NULL;
         return false;
     }
     Node node = mapGetNodeByKey(map,element);
     if(!node){
-        /*If the key doesn't exist return's Null */
+        /*If the key doesn't exist returns false */
+        map->iterator = NULL;
         return false;
     }
     /*If we got here, the key exists*/
+    map->iterator = NULL;
     return true;
 }
 
@@ -253,7 +258,7 @@ Map mapCopy(Map map){
             map->iterator=NULL;
             return NULL;
         }
-        result=mapPut(new_map,current_node_key,current_node_data_copy);
+        result = mapPut(new_map,current_node_key,current_node_data_copy);
         if(result!=MAP_SUCCESS){
             map->freeDataElement(current_node_data_copy);
             mapDestroy(new_map);
@@ -262,7 +267,7 @@ Map mapCopy(Map map){
         }
         map->freeDataElement(current_node_data_copy);
     }
-    map->iterator=NULL;
+    map->iterator = NULL; // Resetting iterator.
     return new_map;
 }
 
@@ -301,6 +306,7 @@ int mapGetSize(Map map){
  */
 MapResult mapRemove(Map map, MapKeyElement keyElement){
     if(!map || !keyElement){
+        map->iterator = NULL;
         return MAP_NULL_ARGUMENT;
     }
     Node node = mapGetNodeByKey(map,keyElement);
