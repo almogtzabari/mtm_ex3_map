@@ -12,13 +12,11 @@ typedef enum NodeResult_t {
     NODE_NULL_ARGUMENT
 } NodeResult;
 
-/** Data element data type for node container */
-typedef void* NodeDataElement;
+
 
 Node nodeCreate(MapDataElement data, MapKeyElement key,
                 copyMapDataElements copyDataElement,
                 copyMapKeyElements copyKeyElement,
-                freeMapDataElements freeDataElement,
                 freeMapKeyElements freeKeyElement);
 
 void nodeDestroy(Node node, freeMapDataElements freeDataElement,
