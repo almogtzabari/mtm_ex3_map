@@ -169,12 +169,18 @@ MapKeyElement mapGetNext(Map map){
     return map->iterator;
 }
 
-/** Checked
+/**
 ***** Function: mapGetFirst *****
-* Description: Sets the internal iterator to the first key in the map,
-* and returns it.
-* @param map - a pointer to a map.
-* @return - First key in the map.
+* Description: Sets the internal iterator (also called current key element)
+* to the first key element in the map. There doesn't need to be an internal
+* order of the keys so the "first" key element is any key element.
+* Use this to start iteraing over the map.
+* To continue iteration use mapGetNext.
+* @param map - The map for which to set the iterator and return the first
+* key element.
+* @return
+*  	NULL if a NULL pointer was sent or the map is empty.
+* 	The first key element of the map otherwise
 */
 MapKeyElement mapGetFirst(Map map){
     if(!map){
@@ -324,23 +330,23 @@ int mapGetSize(Map map){
 }
 
 /**
- ***** Function: mapRemove *****
- * Description: Removes a pair of key and data elements from the map.
- * The elements are found using the comparison function given at
- * initialization. Once found, the elements are removed and deallocated
- * using the free functions supplied at initialzation.
- *  Iterator's value is undefined after this operation.
- * @param map - The map to remove the elements from.
- * @param keyElement - The key element to find and remove from the map.
- * The element will be freed using the free function given at
- * initialization. The data element associated with this key will also be
- * freed using the free function given at initialization.
- * @return
- * 	MAP_NULL_ARGUMENT if a NULL was sent to the function
- *  MAP_ITEM_DOES_NOT_EXIST if an equal key item does not already exists in
- *  the map
- * 	MAP_SUCCESS the paired elements had been removed successfully
- */
+***** Function: mapRemove *****
+* Description: Removes a pair of key and data elements from the map.
+* The elements are found using the comparison function given at
+* initialization. Once found, the elements are removed and deallocated
+* using the free functions supplied at initialzation.
+*  Iterator's value is undefined after this operation.
+* @param map - The map to remove the elements from.
+* @param keyElement - The key element to find and remove from the map.
+* The element will be freed using the free function given at
+* initialization. The data element associated with this key will also be
+* freed using the free function given at initialization.
+* @return
+* 	MAP_NULL_ARGUMENT if a NULL was sent to the function
+*  MAP_ITEM_DOES_NOT_EXIST if an equal key item does not already exists in
+*  the map
+* 	MAP_SUCCESS the paired elements had been removed successfully
+*/
 MapResult mapRemove(Map map, MapKeyElement keyElement){
     if(!map){
         return MAP_NULL_ARGUMENT;

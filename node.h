@@ -2,7 +2,7 @@
 #ifndef MTM_EX3_NODE_H
 #define MTM_EX3_NODE_H
 
-#include "map.h"
+#include "map_mtm.h"
 typedef struct node_t *Node;
 
 /** Type used for returning error codes from map functions */
