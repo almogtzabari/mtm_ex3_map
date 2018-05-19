@@ -8,8 +8,8 @@
 //-----------------------------------------------------------------------//
 
 struct node_t{
-    MapKeyElement key;
-    MapDataElement data;
+    NodeKeyElement key;
+    NodeDataElement data;
     Node next;
 };
 
@@ -32,10 +32,10 @@ struct node_t{
  * memory allocation fail of the data copy function.
  * @return - The new node.
  */
-Node nodeCreate(MapDataElement data, MapKeyElement key,
-                copyMapDataElements copyDataElement,
-                copyMapKeyElements copyKeyElement,
-                freeMapKeyElements freeKeyElement){
+Node nodeCreate(NodeDataElement data, NodeKeyElement key,
+                copyNodeDataElements copyDataElement,
+                copyNodeKeyElements copyKeyElement,
+                freeNodeKeyElements freeKeyElement){
     Node new_node = malloc(sizeof(*new_node));
     if(!new_node){
         /* Failed to allocate memory to node. */
@@ -66,8 +66,8 @@ Node nodeCreate(MapDataElement data, MapKeyElement key,
  * @param freeKeyElement - Function pointer to be used for removing key
  * element from the node.
  */
-void nodeDestroy(Node node, freeMapDataElements freeDataElement,
-                       freeMapKeyElements freeKeyElement){
+void nodeDestroy(Node node, freeNodeDataElements freeDataElement,
+                       freeNodeKeyElements freeKeyElement){
     freeDataElement(node->data);
     freeKeyElement(node->key);
     free(node);
@@ -80,7 +80,7 @@ void nodeDestroy(Node node, freeMapDataElements freeDataElement,
  * @param node - The node which we want to get its key.
  * @return - Node's key element.
  */
-MapKeyElement nodeGetKey(Node node){
+NodeKeyElement nodeGetKey(Node node){
     assert(node);
     return node->key;
 }
@@ -95,7 +95,7 @@ MapKeyElement nodeGetKey(Node node){
  * data element of the node.
  * @return - A copy of the given node's data.
  */
-MapDataElement nodeGetData(Node node,copyMapDataElements copyDataElement){
+NodeDataElement nodeGetData(Node node,copyNodeDataElements copyDataElement){
     if(!node){
         /* Node is NULL. */
         return NULL;
@@ -105,7 +105,7 @@ MapDataElement nodeGetData(Node node,copyMapDataElements copyDataElement){
         return NULL;
     }
     /* Creating a copy of the node's data. */
-    MapDataElement data_copy = copyDataElement(node->data); //todo: bug is here!
+    NodeDataElement data_copy = copyDataElement(node->data); //todo: bug is here!
      /* If copyDataElement failed data_copy will be NULL. */
     return data_copy;
 }
@@ -150,16 +150,16 @@ NodeResult nodeSetNext(Node node, Node next_node){
  * Will be used to destroy node's old data.
  * @return - Status success/failure of the function.
  */
-NodeResult nodeSetData(Node node, MapDataElement new_data,
-                       copyMapDataElements copyDataElement,
-                       freeMapDataElements freeDataElement){
+NodeResult nodeSetData(Node node, NodeDataElement new_data,
+                       copyNodeDataElements copyDataElement,
+                       freeNodeDataElements freeDataElement){
     assert(node);
     if (!new_data){
         /* New data is NULL. */
         return NODE_NULL_ARGUMENT;
     }
     /* Creating a copy of the new Data*/
-    MapDataElement data_copy = copyDataElement(new_data);
+    NodeDataElement data_copy = copyDataElement(new_data);
     if(!data_copy){
         /* Couldn't create the data copy. */
         return NODE_OUT_OF_MEMORY;
