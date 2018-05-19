@@ -10,7 +10,7 @@ void* strCopy (void* string);
 void numberDestroy (void* number);
 void strDestroy (void* string);
 int isBigger (void* number1, void* number2);
-/*zoi*/
+
 int main() {
     Map map=mapCreate(strCopy,numberCopy,strDestroy,numberDestroy,isBigger);
     int key1 = 2; char data1[7] = "hello2";
@@ -25,16 +25,22 @@ int main() {
     int next = *(int*)mapGetNext(map);
     printf("Second key is:%d\n",next);
     printf("Second data is:%s\n",(char*)mapGet(map,&next));
-    printf("Map size:%d\n",mapGetSize(map));
+    next = *(int*)mapGetNext(map);
+    printf("Third key is:%d\n",next);
+    printf("Third data is:%s\n",(char*)mapGet(map,&next));
+    printf("Map size:%d\n\n\n",mapGetSize(map));
     Map new_map = mapCopy(map);
-    printf("New map size:%d",mapGetSize(new_map));
-    printf("Print by order (low to high):\n");
-    printf("First key is:%d\n",*(int*)mapGetFirst(map));
-    printf("First data is:%s\n",(char*)mapGet(map,mapGetFirst(map)));
-    int next = *(int*)mapGetNext(map);
-    printf("Second key is:%d\n",next);
-    printf("Second data is:%s\n",(char*)mapGet(map,&next));
-    printf("Map size:%d\n",mapGetSize(map));
+    printf("New map size:%d\n",mapGetSize(new_map));
+    printf("Print new map by order (low to high):\n");
+    printf("First key is:%d\n",*(int*)mapGetFirst(new_map));
+    printf("First data is:%s\n",(char*)mapGet(map,mapGetFirst(new_map)));
+    int next2 = *(int*)mapGetNext(new_map);
+    printf("Second key is:%d\n",next2);
+    printf("Second data is:%s\n",(char*)mapGet(new_map,&next2));
+    printf("Map size:%d\n",mapGetSize(new_map));
+    next2 = *(int*)mapGetNext(new_map);
+    printf("Third key is:%d\n",next2);
+    printf("Third data is:%s\n",(char*)mapGet(new_map,&next2));
 
 
     return 0;

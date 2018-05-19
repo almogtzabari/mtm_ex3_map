@@ -75,7 +75,10 @@ Map mapCreate(copyMapDataElements copyDataElement,
  */
 MapResult mapPut(Map map, MapKeyElement keyElement,
                  MapDataElement dataElement){
-    if(!map || !keyElement || !dataElement){ // todo: Check what we need to do in case key \ data is null.
+    if(!map){
+        return MAP_NULL_ARGUMENT;
+    }
+    if(!keyElement || !dataElement){ // todo: Check what we need to do in case key \ data is null.
         map->iterator = NULL;
         return MAP_NULL_ARGUMENT;
     }
@@ -202,7 +205,10 @@ MapDataElement mapGet(Map map, MapKeyElement keyElement){
  * @return
  */
 bool mapContains(Map map, MapKeyElement element){
-    if(!map || !element){
+    if(!map){
+        return false;
+    }
+    if(!element){
         map->iterator = NULL;
         return false;
     }
@@ -305,7 +311,10 @@ int mapGetSize(Map map){
  * 	MAP_SUCCESS the paired elements had been removed successfully
  */
 MapResult mapRemove(Map map, MapKeyElement keyElement){
-    if(!map || !keyElement){
+    if(!map){
+        return MAP_NULL_ARGUMENT;
+    }
+    if(!keyElement){
         map->iterator = NULL;
         return MAP_NULL_ARGUMENT;
     }
@@ -367,7 +376,7 @@ MapResult mapClear(Map map) {
  */
 static Node mapNodeToPlaceBefore(Map map, MapKeyElement key){
     MAP_FOREACH(MapKeyElement,iterator,map) {
-       if(map->compareKeyElements(iterator,key)==-1){
+       if(map->compareKeyElements(iterator,key)<0){
            continue;
        }
        return mapGetNodeByKey(map,iterator);
