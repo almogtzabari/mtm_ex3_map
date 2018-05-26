@@ -11,6 +11,8 @@
 //static Node mapFindNodeToPointTo(Map map, MapKeyElement key);
 static Node mapGetNodeByKey(Map map,MapKeyElement key);
 static Node mapGetPreviousNode(Map map, Node node);
+static MapResult mapAddNewData(Map map, MapKeyElement keyElement,
+                               MapDataElement dataElement);
 
 //-----------------------------------------------------------------------//
 //                            STRUCT MAP                                 //
@@ -202,50 +204,16 @@ bool mapContains(Map map, MapKeyElement element){
 MapResult mapPut(Map map, MapKeyElement keyElement, MapDataElement dataElement) {
     if (!map || !keyElement || !dataElement) {
         /* At least one of the arguments is NULL. */
+        map->iterator = NULL;
         return MAP_NULL_ARGUMENT;
     }
     if (!mapContains(map, keyElement)) {
-        /* Item does not exist and we need to create it and add it. */
-        Node new_node = nodeCreate(dataElement, keyElement,
-                                   map->copyDataElement,
-                                   map->copyKeyElement,
-                                   map->freeKeyElement); // Creating the new node.
-        if(!new_node){
+        MapResult status = mapAddNewData(map, keyElement, dataElement);
+        if(status!=MAP_SUCCESS){
+            map->iterator = NULL;
             return MAP_OUT_OF_MEMORY;
         }
-        /* Adding the new node: Trying to find its place. */
-        MAP_FOREACH(MapKeyElement, current, map) {
-            /* Looking for the first key that is bigger than our key. */
-            if (map->compareKeyElements(current, keyElement) > 0) {
-                Node current_node = mapGetNodeByKey(map, current);
-                Node previous_node = mapGetPreviousNode(map, current_node);
-                if (previous_node){
-                    /* This is not the beginning of the list. */
-                    nodeSetNext(previous_node, new_node);
-                    nodeSetNext(new_node, current_node);
-                    map->mapSize++;
-                    return MAP_SUCCESS;
-                }
-                /* If previous_node is NULL then the new node should be
-                 * * added to the beginning of the list.*/
-                map->list = new_node;
-                nodeSetNext(new_node, current_node);
-                map->mapSize++;
-                return MAP_SUCCESS;
-            }
-        }
-        /* If we got here then the new node should be at the end. */
-        Node previous_node = mapGetPreviousNode(map,NULL);
-        if(!previous_node){
-            /* List is empty*/
-            map->list = new_node;
-            map->mapSize++;
-            return MAP_SUCCESS;
-        }
-        /* List is not empty. */
-        nodeSetNext(previous_node,new_node);
-        nodeSetNext(new_node,NULL);
-        map->mapSize++;
+        map->iterator = NULL;
         return MAP_SUCCESS;
     }
     /* If we got here then the item exist and we need to modify its data.*/
@@ -492,5 +460,52 @@ static Node mapGetPreviousNode(Map map, Node node) {
     /* If we got here then map is empty or the given node is first. */
     return NULL;
 }
+
+static MapResult mapAddNewData(Map map, MapKeyElement keyElement,
+                               MapDataElement dataElement){
+
+    /* Item does not exist and we need to create it and add it. */
+    Node new_node = nodeCreate(dataElement, keyElement,
+                               map->copyDataElement, map->copyKeyElement,
+                               map->freeKeyElement); // Creating the new node.
+    if(!new_node){
+        return MAP_OUT_OF_MEMORY;
+    }
+    /* Adding the new node: Trying to find its place. */
+    MAP_FOREACH(MapKeyElement, current, map) {
+        /* Looking for the first key that is bigger than our key. */
+        if (map->compareKeyElements(current, keyElement) > 0) {
+            Node current_node = mapGetNodeByKey(map, current);
+            Node previous_node = mapGetPreviousNode(map, current_node);
+            if (previous_node){
+                /* This is not the beginning of the list. */
+                nodeSetNext(previous_node, new_node);
+                nodeSetNext(new_node, current_node);
+                map->mapSize++;
+                return MAP_SUCCESS;
+            }
+            /* If previous_node is NULL then the new node should be
+             * * added to the beginning of the list.*/
+            map->list = new_node;
+            nodeSetNext(new_node, current_node);
+            map->mapSize++;
+            return MAP_SUCCESS;
+        }
+    }
+    /* If we got here then the new node should be at the end. */
+    Node previous_node = mapGetPreviousNode(map,NULL);
+    if(!previous_node){
+        /* List is empty*/
+        map->list = new_node;
+        map->mapSize++;
+        return MAP_SUCCESS;
+    }
+    /* List is not empty. */
+    nodeSetNext(previous_node,new_node);
+    nodeSetNext(new_node,NULL);
+    map->mapSize++;
+    return MAP_SUCCESS;
+}
+
 
 
