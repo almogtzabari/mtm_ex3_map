@@ -115,15 +115,11 @@ NodeResult nodeSetData(Node node, NodeDataElement new_data,
 
 /**
  ***** Function: nodeGetData *****
- * Description: Gets a node and a copy data function and returns a copy of
- * node's data element.
- * NOTICE: USER IS RESPONSIBLE FOR DESTROYING THE DATA COPY.
+ * Description: Gets a node and returns node's data element.
  * @param node - The node which we want to get a copy of its data.
- * @param copyDataElement - Function pointer to be used for copying the
- * data element of the node.
- * @return - A copy of the given node's data.
+ * @return - Node's data.
  */
-NodeDataElement nodeGetData(Node node, copyNodeDataElements copyDataElement);
+NodeDataElement nodeGetData(Node node);
 
 /**
  ***** Function: nodeDestroy *****

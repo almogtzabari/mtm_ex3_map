@@ -256,8 +256,7 @@ MapDataElement mapGet(Map map, MapKeyElement keyElement){
         return NULL;
     }
     assert(current_node);
-    MapDataElement current_node_data = nodeGetData
-            (current_node,map->copyDataElement);
+    MapDataElement current_node_data = nodeGetData(current_node);
     /* Current_node_data will be NULL if copyDataElement failed*/
     return current_node_data;
 }

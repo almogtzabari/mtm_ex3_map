@@ -97,19 +97,12 @@ NodeKeyElement nodeGetKey(Node node){
  * data element of the node.
  * @return - A copy of the given node's data.
  */
-NodeDataElement nodeGetData(Node node,copyNodeDataElements copyDataElement){
+NodeDataElement nodeGetData(Node node){
     if(!node){
         /* Node is NULL. */
         return NULL;
     }
-    if(!(node->data)){
-        /* Node data is NULL. */
-        return NULL;
-    }
-    /* Creating a copy of the node's data. */
-    NodeDataElement data_copy = copyDataElement(node->data); //todo: bug is here!
-     /* If copyDataElement failed data_copy will be NULL. */
-    return data_copy;
+    return node->data;
 }
 
 /**
