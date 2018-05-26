@@ -219,7 +219,7 @@ MapResult mapPut(Map map, MapKeyElement keyElement, MapDataElement dataElement) 
             if (map->compareKeyElements(current, keyElement) > 0) {
                 Node current_node = mapGetNodeByKey(map, current);
                 Node previous_node = mapGetPreviousNode(map, current_node);
-                if (!previous_node){
+                if (previous_node){
                     /* This is not the beginning of the list. */
                     nodeSetNext(previous_node, new_node);
                     nodeSetNext(new_node, current_node);
@@ -232,9 +232,11 @@ MapResult mapPut(Map map, MapKeyElement keyElement, MapDataElement dataElement) 
                 nodeSetNext(new_node, current_node);
                 map->mapSize++;
                 return MAP_SUCCESS;
-                }
             }
         }
+        /* If we got here then the new node should be at the end. */
+
+    }
     /* If we got here then the item exist and we need to modify its data.*/
     MAP_FOREACH(MapKeyElement, current, map) {
         if (map->compareKeyElements(current, keyElement) == 0) {
