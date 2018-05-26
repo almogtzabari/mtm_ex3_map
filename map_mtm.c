@@ -235,7 +235,9 @@ MapResult mapPut(Map map, MapKeyElement keyElement, MapDataElement dataElement) 
             }
         }
         /* If we got here then the new node should be at the end. */
-
+        Node previous_node = mapGetPreviousNode(map,NULL);
+        nodeSetNext(previous_node,new_node);
+        nodeSetNext(new_node,NULL);
     }
     /* If we got here then the item exist and we need to modify its data.*/
     MAP_FOREACH(MapKeyElement, current, map) {
