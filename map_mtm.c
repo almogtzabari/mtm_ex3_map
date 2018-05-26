@@ -514,12 +514,12 @@ static MapResult mapModifyData(Map map, MapKeyElement keyElement,
         if (map->compareKeyElements(current, keyElement) == 0) {
             /* Found our key. */
             if (nodeSetData(map->iterator, dataElement,
-                            map->copyDataElement, map->freeDataElement) !=
-                NODE_SUCCESS)
+                            map->copyDataElement, map->freeDataElement) != NODE_SUCCESS){
                 /*  Memory Error .*/
                 return MAP_OUT_OF_MEMORY;
+            }
+            return MAP_SUCCESS;
         }
-        return MAP_SUCCESS;
     }
     /* Shouldn't get here. */
     return MAP_OUT_OF_MEMORY;
