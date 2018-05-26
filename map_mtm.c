@@ -157,6 +157,8 @@ int mapGetSize(Map map){
 * determined equal using the comparison function used to initialize the
 * map.
 *
+* Notice: This Resets the iterator.
+*
 * @param map - The map to search in.
 * @param element - The element to look for. Will be compared using the
 * 		comparison function.
@@ -169,19 +171,14 @@ bool mapContains(Map map, MapKeyElement element){
     if(!map){
         return false;
     }
-    if(!element){
-        map->iterator = NULL;
-        return false;
+    MAP_FOREACH(Node,current,map){
+        if(map->compareKeyElements(current,element)==0){
+            /* Found needed key. */
+            return true;
+        }
     }
-    Node node = mapGetNodeByKey(map,element);
-    if(!node){
-        /*If the key doesn't exist returns false */
-        map->iterator = NULL;
-        return false;
-    }
-    /*If we got here, the key exists*/
-    map->iterator = NULL;
-    return true;
+    return false;
+
 }
 
 /**
@@ -202,57 +199,55 @@ bool mapContains(Map map, MapKeyElement element){
 * copying an element failed).
 * MAP_SUCCESS the paired elements had been inserted successfully.
 */
-MapResult mapPut(Map map, MapKeyElement keyElement,
-                 MapDataElement dataElement){
-    if(!map){
-        return MAP_NULL_ARGUMENT;
-    }
-    if(!keyElement || !dataElement){
-        map->iterator = NULL;
+MapResult mapPut(Map map, MapKeyElement keyElement, MapDataElement dataElement){
+    if(!map || !keyElement || !dataElement){
+        /* At least one of the arguments is NULL. */
         return MAP_NULL_ARGUMENT;
     }
     if(!mapContains(map,keyElement)){
-        /* Key element does not exists in map.
-         * Creating a new node. */
-        Node new_node = nodeCreate(dataElement,keyElement,
-                                   map->copyDataElement,
-                                   map->copyKeyElement,
-                                   map->freeKeyElement);
-        if(!new_node){ // Node creation failed.
-            map->iterator = NULL;
-            return MAP_OUT_OF_MEMORY;
-        }
-        MapKeyElement key = nodeGetKey(new_node);
-        Node after_node = mapFindNodeToPointTo(map, key);
-        /* Next node is the node that supposed to be after the new node.
-         * In case of NULL, new node is the current last node.*/
-        nodeSetNext(new_node,after_node);
-        Node before_node = mapGetPreviousNode(map,after_node);
-        if(before_node){
-            nodeSetNext(before_node,new_node);
-        }
-        else{
-            /*  If we got here then new node should be placed at the
-             * beginning of the map.*/
-            map->list = new_node;
-        }
-        map->iterator = NULL; // Resetting iterator.
-        map->mapSize++; // Added new element.
-        return MAP_SUCCESS;
+        
     }
-    /* If we got here, the key already exists and we need to modify its
-     * data. */
-    map->iterator = NULL; // Resetting iterator.
-    // Modify data of key.
-    NodeResult result = nodeSetData(mapGetNodeByKey(map,keyElement)
-            ,dataElement,map->copyDataElement,map->freeDataElement);
-
-    if(result!=NODE_SUCCESS){
-        /* Couldn't create a copy of the new data.
-         * Node's data remained as it was. */
-        return MAP_OUT_OF_MEMORY;
-    }
-    return MAP_SUCCESS;
+//        /* Key element does not exists in map.
+//         * Creating a new node. */
+//        Node new_node = nodeCreate(dataElement,keyElement,
+//                                   map->copyDataElement,
+//                                   map->copyKeyElement,
+//                                   map->freeKeyElement);
+//        if(!new_node){ // Node creation failed.
+//            map->iterator = NULL;
+//            return MAP_OUT_OF_MEMORY;
+//        }
+//        MapKeyElement key = nodeGetKey(new_node);
+//        Node after_node = mapFindNodeToPointTo(map, key);
+//        /* Next node is the node that supposed to be after the new node.
+//         * In case of NULL, new node is the current last node.*/
+//        nodeSetNext(new_node,after_node);
+//        Node before_node = mapGetPreviousNode(map,after_node);
+//        if(before_node){
+//            nodeSetNext(before_node,new_node);
+//        }
+//        else{
+//            /*  If we got here then new node should be placed at the
+//             * beginning of the map.*/
+//            map->list = new_node;
+//        }
+//        map->iterator = NULL; // Resetting iterator.
+//        map->mapSize++; // Added new element.
+//        return MAP_SUCCESS;
+//    }
+//    /* If we got here, the key already exists and we need to modify its
+//     * data. */
+//    map->iterator = NULL; // Resetting iterator.
+//    // Modify data of key.
+//    NodeResult result = nodeSetData(mapGetNodeByKey(map,keyElement)
+//            ,dataElement,map->copyDataElement,map->freeDataElement);
+//
+//    if(result!=NODE_SUCCESS){
+//        /* Couldn't create a copy of the new data.
+//         * Node's data remained as it was. */
+//        return MAP_OUT_OF_MEMORY;
+//    }
+//    return MAP_SUCCESS;
 }
 
 /**
@@ -377,16 +372,6 @@ MapKeyElement mapGetNext(Map map){
     if(!map->iterator){
         return NULL;
     }
-//    Node current_node = mapGetNodeByKey(map,map->iterator);
-//    if(!current_node){
-//        /* Empty map */
-//        return NULL;
-//    }
-//    Node next_node = nodeGetNext(current_node);
-//    if(!next_node){
-//        /* Current node is the last node */
-//        return NULL;
-//    }
     map->iterator = nodeGetNext(map->iterator);
     return nodeGetKey(map->iterator);
 }
