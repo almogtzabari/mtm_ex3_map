@@ -5,20 +5,26 @@
 #include <stdio.h>
 
 //-----------------------------------------------------------------------//
-//                  DECLARATIONS OF STATIC FUNCTIONS                     //
+//                            MAP: DEFINES                               //
 //-----------------------------------------------------------------------//
 
-//static Node mapFindNodeToPointTo(Map map, MapKeyElement key);
+#define ILLEGAL_VALUE -1
+
+//-----------------------------------------------------------------------//
+//                 MAP: STATIC FUNCTIONS DECLARATIONS                    //
+//-----------------------------------------------------------------------//
+
 static Node mapGetNodeByKey(Map map,MapKeyElement key);
 static Node mapGetPreviousNode(Map map, Node node);
 static MapResult mapAddNewData(Map map, MapKeyElement keyElement,
                                MapDataElement dataElement);
 static MapResult mapModifyData(Map map, MapKeyElement keyElement,
-                               MapDataElement dataElement);
+                               MapDataElement new_data);
 
 //-----------------------------------------------------------------------//
-//                            STRUCT MAP                                 //
+//                            MAP: STRUCT                                //
 //-----------------------------------------------------------------------//
+
 struct Map_t{
     Node list;
     Node iterator;
@@ -31,7 +37,7 @@ struct Map_t{
 };
 
 //-----------------------------------------------------------------------//
-//                         STRUCT MAP FUNCTIONS                          //
+//                            MAP: FUNCTIONS                             //
 //-----------------------------------------------------------------------//
 
 /**
@@ -62,6 +68,7 @@ Map mapCreate(copyMapDataElements copyDataElement,
     Map map = malloc(sizeof(*map));
     if(!map || !copyDataElement || !copyKeyElement || !freeDataElement
        || !freeKeyElement || !compareKeyElements){
+        /* At least one of the given arguments is NULL. */
         free(map);
         return NULL;
     }
@@ -114,7 +121,9 @@ Map mapCopy(Map map){
         return NULL;
     }
     MAP_FOREACH(MapKeyElement,current_key,map){
-        if(mapPut(new_map,current_key,mapGet(map,current_key))!=MAP_SUCCESS){
+        if(mapPut(new_map,current_key,mapGet(map,
+                                             current_key))!=MAP_SUCCESS){
+            /* Memory allocation fail. */
             mapDestroy(new_map);
             return NULL;
         }
@@ -128,12 +137,12 @@ Map mapCopy(Map map){
 *
 * @param map - The map which size is requested.
 * @return
-* -1 if a NULL pointer was sent.
+* ILLEGAL_VALUE if a NULL pointer was sent.
 * Otherwise the number of elements in the map.
 */
 int mapGetSize(Map map){
     if(!map){
-        return -1;
+        return ILLEGAL_VALUE;
     }
     return map->mapSize;
 }
@@ -166,7 +175,6 @@ bool mapContains(Map map, MapKeyElement element){
         }
     }
     return false;
-
 }
 
 /**
@@ -189,7 +197,7 @@ bool mapContains(Map map, MapKeyElement element){
 */
 MapResult mapPut(Map map, MapKeyElement keyElement, MapDataElement dataElement) {
     if (!map) {
-        /* map is NULL. */
+        /* Map is NULL. */
         return MAP_NULL_ARGUMENT;
     }
     if(!keyElement || !dataElement){
@@ -200,18 +208,22 @@ MapResult mapPut(Map map, MapKeyElement keyElement, MapDataElement dataElement) 
         /* Item doesn't exist and we need to add it */
         MapResult status = mapAddNewData(map, keyElement, dataElement);
         if(status!=MAP_SUCCESS){
+            /* Failed to add new data. */
             map->iterator = NULL;
             return MAP_OUT_OF_MEMORY;
         }
+        /* New data added successfully. */
         map->iterator = NULL;
         return MAP_SUCCESS;
     }
-    /* Item exist and we need to modify its data.*/
+    /* Item exist in map and we need to modify its data.*/
     MapResult status = mapModifyData(map,keyElement,dataElement);
     if(status!=MAP_SUCCESS){
+        /* Failed to modify key.*/
         map->iterator = NULL;
         return MAP_OUT_OF_MEMORY;
     }
+    /* Key modified successfully. */
     map->iterator = NULL;
     return MAP_SUCCESS;
 }
@@ -232,6 +244,7 @@ MapResult mapPut(Map map, MapKeyElement keyElement, MapDataElement dataElement) 
 */
 MapDataElement mapGet(Map map, MapKeyElement keyElement){
     if(!map || !keyElement){
+        /* At least one of the given arguments is NULL. */
         return NULL;
     }
     Node current_node = mapGetNodeByKey(map,keyElement);
@@ -266,9 +279,11 @@ MapDataElement mapGet(Map map, MapKeyElement keyElement){
 */
 MapResult mapRemove(Map map, MapKeyElement keyElement){
     if(!map){
+        /* Map is NULL. */
         return MAP_NULL_ARGUMENT;
     }
     if(!keyElement){
+        /* Key is NULL.*/
         map->iterator = NULL;
         return MAP_NULL_ARGUMENT;
     }
@@ -279,6 +294,8 @@ MapResult mapRemove(Map map, MapKeyElement keyElement){
         return MAP_ITEM_DOES_NOT_EXIST;
     }
     Node previous_node = mapGetPreviousNode(map,node);
+    /* If the previous node is NULL it means that the current node is
+     * the first in the map. */
     if(!previous_node){
         /* Node with given key is first. */
         map->list = nodeGetNext(node);
@@ -288,6 +305,7 @@ MapResult mapRemove(Map map, MapKeyElement keyElement){
     }
     nodeSetNext(previous_node,nodeGetNext(node));
     nodeDestroy(node,map->freeDataElement,map->freeKeyElement);
+    /* Sucessfully removed. */
     map->iterator = NULL; // Resetting iterator.
     return MAP_SUCCESS;
 }
@@ -308,6 +326,7 @@ MapResult mapRemove(Map map, MapKeyElement keyElement){
 */
 MapKeyElement mapGetFirst(Map map){
     if(!map){
+        /* Map is NULL. */
         return NULL;
     }
     /* In case of empty map returns NULL.*/
@@ -333,9 +352,11 @@ MapKeyElement mapGetFirst(Map map){
 */
 MapKeyElement mapGetNext(Map map){
     if(!map){
+        /* Map is NULL. */
         return NULL;
     }
     if(!map->iterator){
+        /* Reached end of the map. */
         return NULL;
     }
     map->iterator = nodeGetNext(map->iterator);
@@ -363,43 +384,20 @@ MapResult mapClear(Map map) {
 }
 
 //-----------------------------------------------------------------------//
-//                        MAP STATIC FUNCTIONS                           //
+//                        MAP: STATIC FUNCTIONS                          //
 //-----------------------------------------------------------------------//
-
-///**
-//***** Static function: mapFindNodeToPointTo *****
-//* Description: Finds the node in the map that should be pointed by the
-//* new created node.
-//*
-//* @param map - The map to search the node in.
-//* @param key - The key element which belongs to the node that should be
-//* pointed by the new node.
-//* @return
-//* A pointer to the node that should be pointed by the new created
-//* node.
-//* NULL if the new node should be placed at the end of the map.
-//*/
-//static Node mapFindNodeToPointTo(Map map, MapKeyElement key){
-//    MAP_FOREACH(MapKeyElement,iterator,map) {
-//        if(map->compareKeyElements(iterator,key)<0){
-//            continue;
-//        }
-//        return mapGetNodeByKey(map,iterator);
-//    }
-//    /* If we got here then the node should be placed at the end of the
-//     * map. */
-//    return NULL;
-//}
 
 /**
 ***** Static function: mapGetNodeByKey *****
-* Description: Find a node which the given key belongs to.
+* Description: Finds the node which the given key belongs to.
+*
 * @param map - The map to search the node in.
 * @param key - The key element which belongs to the node we are looking
 * for.
+*
 * @return
-* A pointer to the node which contains the given key.
-* NULL if the key has not been found in the map.
+* Node which contains the given key.
+* NULL if the key was not found in the map.
 */
 static Node mapGetNodeByKey(Map map,MapKeyElement key){
     assert(key);
@@ -408,8 +406,10 @@ static Node mapGetNodeByKey(Map map,MapKeyElement key){
     while(current_node) {
         current_node_key = nodeGetKey(current_node);
         if (map->compareKeyElements(current_node_key, key) == 0){
+            /* Node was found. */
             return current_node;
         }
+        /* Steping to the next node. */
         current_node = nodeGetNext(current_node);
     }
     /* Node with that key wasn't found. */
@@ -418,13 +418,13 @@ static Node mapGetNodeByKey(Map map,MapKeyElement key){
 /**
 ***** Function: mapGetPreviousNode *****
 * Description: Finds the node in the map that points to the given node.
+ *
 * @param map - The map to search the node in.
 * @param Node - A node that we want to find its previous.
 *
 * @return
-* A pointer to the previous node of the given node.
-* NULL in case the map is empty or no nodes should be placed before the
-* given node.
+* The previous node of the given node.
+* NULL in case the map is empty or the given node is first.
 */
 static Node mapGetPreviousNode(Map map, Node node) {
     assert(map);
@@ -432,6 +432,7 @@ static Node mapGetPreviousNode(Map map, Node node) {
     MAP_FOREACH(MapKeyElement, iterator, map) {
         node_iterator = mapGetNodeByKey(map, iterator);
         if (nodeGetNext(node_iterator) == node) {
+            /* Previous node was found. */
             return node_iterator;
         }
     }
@@ -439,6 +440,19 @@ static Node mapGetPreviousNode(Map map, Node node) {
     return NULL;
 }
 
+/**
+ ***** Function: mapAddNewData *****
+ * Description: Gets a data and a key which doesn't already exist in the
+ * map and puts it in the map.
+ *
+ * @param map - Map to add to.
+ * @param keyElement - Key element to add to the map.
+ * @param dataElement - Data element to add to the map.
+ *
+ * @return
+ * MAP_OUT_OF_MEMORY - Any memory error.
+ * MAP_SUCCESS - Sucessfully added.
+ */
 static MapResult mapAddNewData(Map map, MapKeyElement keyElement,
                                MapDataElement dataElement){
 
@@ -485,17 +499,29 @@ static MapResult mapAddNewData(Map map, MapKeyElement keyElement,
     return MAP_SUCCESS;
 }
 
+/**
+ ***** Function: mapModifyData *****
+ * Description: Modify an existing key in the map.
+ *
+ * @param map - Map of the key.
+ * @param keyElement - Key to modify.
+ * @param new_data - New data.
+ * @return
+ * MAP_OUT_OF_MEMORY - Any memory error.
+ * MAP_SUCCESS - Key successfully modified.
+ */
 static MapResult mapModifyData(Map map, MapKeyElement keyElement,
-                               MapDataElement dataElement){
+                               MapDataElement new_data){
 
     MAP_FOREACH(MapKeyElement, current, map) {
         if (map->compareKeyElements(current, keyElement) == 0) {
             /* Found our key. */
-            if (nodeSetData(map->iterator, dataElement,
+            if (nodeSetData(map->iterator, new_data,
                             map->copyDataElement, map->freeDataElement) != NODE_SUCCESS){
                 /*  Memory Error .*/
                 return MAP_OUT_OF_MEMORY;
             }
+            /* Sucessfully modified. */
             return MAP_SUCCESS;
         }
     }

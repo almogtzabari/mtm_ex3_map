@@ -3,7 +3,7 @@
 #define MTM_EX3_NODE_H
 
 //-----------------------------------------------------------------------//
-//                             TYPEDEFS                                  //
+//                           NODE: TYPEDEFS                              //
 //-----------------------------------------------------------------------//
 
 typedef struct node_t *Node;
@@ -34,12 +34,13 @@ typedef void(*freeNodeDataElements)(NodeDataElement);
 typedef void(*freeNodeKeyElements)(NodeKeyElement);
 
 //-----------------------------------------------------------------------//
-//                      FUNCTION DECLARATIONS                            //
+//                           NODE: FUNCTION                              //
 //-----------------------------------------------------------------------//
 
 /**
  ***** Function: nodeCreate *****
  * Description: Creates a new node.
+ *
  * @param data - The data element which need to be assigned to the new
  * node.
  * @param key - The key element which need to be assigned to the new node.
@@ -50,7 +51,10 @@ typedef void(*freeNodeKeyElements)(NodeKeyElement);
  * @param freeKeyElement - Function pointer to be used for removing key
  * element from the node. This free function will be used in case of
  * memory allocation fail of the data copy function.
- * @return - The new node.
+ *
+ * @return
+ * new node in case of success.
+ * NULL in case of memory fail or NULL arguments.
  */
 Node nodeCreate(NodeDataElement data, NodeKeyElement key,
                 copyNodeDataElements copyDataElement,
@@ -60,6 +64,7 @@ Node nodeCreate(NodeDataElement data, NodeKeyElement key,
 /**
  ***** Function: nodeDestroy *****
  * Description: Frees all allocated memory of the given node.
+ *
  * @param node - The node we want to destroy.
  * @param freeDataElement - Function pointer to be used for removing data
  * element from the node.
@@ -72,8 +77,9 @@ void nodeDestroy(Node node, freeNodeDataElements freeDataElement,
 /**
  ***** Function: nodeGetKey *****
  * Description: Gets a node and returns node's key.
- * NOTICE: THE ORIGINAL KEY IS RETURNED.
+ *
  * @param node - The node which we want to get its key.
+ *
  * @return - Node's key element.
  */
 NodeKeyElement nodeGetKey(Node node);
@@ -81,8 +87,11 @@ NodeKeyElement nodeGetKey(Node node);
 /**
  ***** Function: nodeGetNext *****
  * Descritpion: Returns the next node of the given node.
+ *
  * @param node - The node which we want to find its next node.
- * @return - The next node.
+ *
+ * @return
+ * The next node.
  */
 Node nodeGetNext(Node node);
 
@@ -90,9 +99,13 @@ Node nodeGetNext(Node node);
  ***** Function: nodeSetNext *****
  * Description: Gets a node and a next_node and sets node's next
  * to be 'next_node'.
+ *
  * @param node - The node which we want to change its 'next'.
- * @param next_node - The node which we want to be pointed at by 'node'
- * @return - Status success/failure of function.
+ * @param next_node - The node which we want to be pointed at by 'node'.
+ *
+ * @return
+ * NODE_NULL_ARGUMENT - Node is NULL.
+ * NODE_SUCCESS - Success.
  */
 NodeResult nodeSetNext(Node node, Node next_node);
 
@@ -101,13 +114,18 @@ NodeResult nodeSetNext(Node node, Node next_node);
  * Description: The function gets a node and a new data and creates a copy
  * of the data. The copy of the new data will be inserted to node's data.
  * Node's old data will be destroyed.
+ *
  * @param node - The node which we want to modify its data.
  * @param new_data - The new data to insert into the node.
  * @param copyDataElement - Pointer to the copy data element function.
  * Will be used to create a copy of the given new data.
  * @param freeDataElement - Pointer to the free data element function.
  * Will be used to destroy node's old data.
- * @return - Status success/failure of the function.
+ *
+ * @return
+ * NODE_NULL_ARGUMENT - At least one of the arguments is NULL.
+ * NODE_OUT_OF_MEMORY - Any memory error.
+ * NODE_SUCCESS - Sucess.
  */
 NodeResult nodeSetData(Node node, NodeDataElement new_data,
                        copyNodeDataElements copyDataElement,
@@ -115,22 +133,13 @@ NodeResult nodeSetData(Node node, NodeDataElement new_data,
 
 /**
  ***** Function: nodeGetData *****
- * Description: Gets a node and returns node's data element.
- * @param node - The node which we want to get a copy of its data.
- * @return - Node's data.
+ * Description: Gets a node and returns node's data.
+ *
+ * @param node - The node which we want to get its data.
+ *
+ * @return - A copy of the given node's data.
  */
 NodeDataElement nodeGetData(Node node);
 
-/**
- ***** Function: nodeDestroy *****
- * Description: Frees all allocated memory of the given node.
- * @param node - The node we want to destroy.
- * @param freeDataElement - Function pointer to be used for removing data
- * element from the node.
- * @param freeKeyElement - Function pointer to be used for removing key
- * element from the node.
- */
-void nodeDestroy(Node node, freeNodeDataElements freeDataElement,
-                 freeNodeKeyElements freeKeyElement);
 
 #endif //MTM_EX3_NODE_H
