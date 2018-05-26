@@ -204,8 +204,11 @@ bool mapContains(Map map, MapKeyElement element){
 * MAP_SUCCESS the paired elements had been inserted successfully.
 */
 MapResult mapPut(Map map, MapKeyElement keyElement, MapDataElement dataElement) {
-    if (!map || !keyElement || !dataElement) {
-        /* At least one of the arguments is NULL. */
+    if (!map) {
+        /* map is NULL. */
+        return MAP_NULL_ARGUMENT;
+    }
+    if(!keyElement || !dataElement){
         map->iterator = NULL;
         return MAP_NULL_ARGUMENT;
     }
