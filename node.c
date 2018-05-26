@@ -50,8 +50,8 @@ Node nodeCreate(NodeDataElement data, NodeKeyElement key,
     new_node->data = copyDataElement(data);
     if(!new_node->data){
         /* Failed to copy data. */
-        freeKeyElement(new_node->key);
         free(new_node);
+        freeKeyElement(new_node->key);
     }
     new_node->next = NULL;
     return new_node;
@@ -81,7 +81,9 @@ void nodeDestroy(Node node, freeNodeDataElements freeDataElement,
  * @return - Node's key element.
  */
 NodeKeyElement nodeGetKey(Node node){
-    assert(node);
+    if(!node){
+        return NULL;
+    }
     return node->key;
 }
 

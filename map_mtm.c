@@ -17,7 +17,7 @@ static Node mapGetPreviousNode(Map map, Node node);
 //-----------------------------------------------------------------------//
 struct Map_t{
     Node list;
-    MapKeyElement iterator;
+    Node iterator;
     copyMapDataElements copyDataElement;
     copyMapKeyElements copyKeyElement;
     freeMapDataElements freeDataElement;
@@ -58,7 +58,7 @@ Map mapCreate(copyMapDataElements copyDataElement,
     Map map = malloc(sizeof(*map));
     if(!map || !copyDataElement || !copyKeyElement || !freeDataElement
        || !freeKeyElement || !compareKeyElements){
-        mapDestroy(map);
+        free(map);
         return NULL;
     }
     map->copyDataElement = copyDataElement;
@@ -353,8 +353,8 @@ MapKeyElement mapGetFirst(Map map){
     if(!map->list){
         return NULL;
     }
-    map->iterator = nodeGetKey(map->list);
-    return map->iterator;
+    map->iterator = map->list;
+    return nodeGetKey(map->iterator);
 }
 
 /**
@@ -377,18 +377,18 @@ MapKeyElement mapGetNext(Map map){
     if(!map->iterator){
         return NULL;
     }
-    Node current_node = mapGetNodeByKey(map,map->iterator);
-    if(!current_node){
-        /* Empty map */
-        return NULL;
-    }
-    Node next_node = nodeGetNext(current_node);
-    if(!next_node){
-        /* Current node is the last node */
-        return NULL;
-    }
-    map->iterator = nodeGetKey(next_node);
-    return map->iterator;
+//    Node current_node = mapGetNodeByKey(map,map->iterator);
+//    if(!current_node){
+//        /* Empty map */
+//        return NULL;
+//    }
+//    Node next_node = nodeGetNext(current_node);
+//    if(!next_node){
+//        /* Current node is the last node */
+//        return NULL;
+//    }
+    map->iterator = nodeGetNext(map->iterator);
+    return nodeGetKey(map->iterator);
 }
 
 /**
@@ -413,6 +413,7 @@ MapResult mapClear(Map map) {
                     map->freeKeyElement);
     }
     return MAP_SUCCESS;
+
 }
 
 //-----------------------------------------------------------------------//
