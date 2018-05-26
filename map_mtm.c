@@ -113,28 +113,12 @@ Map mapCopy(Map map){
         map->iterator=NULL;
         return NULL;
     }
-    MapDataElement current_node_data_copy;
-    MapResult result;
-    MAP_FOREACH(MapKeyElement,current_node_key,map){
-        /* mapGet creates a copy of the current node data */
-        current_node_data_copy = mapGet(map,current_node_key);
-        if(!current_node_data_copy){
-            /* Failed to copy data */
+    MAP_FOREACH(MapKeyElement,current_key,map){
+        if(mapPut(new_map,current_key,mapGet(map,current_key))!=MAP_SUCCESS){
             mapDestroy(new_map);
-            map->iterator=NULL;
             return NULL;
         }
-        result = mapPut(new_map,current_node_key,current_node_data_copy);
-        if(result!=MAP_SUCCESS){
-            map->freeDataElement(current_node_data_copy);
-            mapDestroy(new_map);
-            map->iterator=NULL;
-            return NULL;
-        }
-        /* Finished using current node data copy, frees it */
-        map->freeDataElement(current_node_data_copy);
     }
-    map->iterator = NULL; // Resetting iterator.
     return new_map;
 }
 
