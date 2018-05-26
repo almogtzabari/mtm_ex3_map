@@ -199,74 +199,58 @@ bool mapContains(Map map, MapKeyElement element){
 * copying an element failed).
 * MAP_SUCCESS the paired elements had been inserted successfully.
 */
-MapResult mapPut(Map map, MapKeyElement keyElement, MapDataElement dataElement){
-    if(!map || !keyElement || !dataElement){
+MapResult mapPut(Map map, MapKeyElement keyElement, MapDataElement dataElement) {
+    if (!map || !keyElement || !dataElement) {
         /* At least one of the arguments is NULL. */
         return MAP_NULL_ARGUMENT;
     }
-    if(!mapContains(map,keyElement)){
-        /* Item does not exist and we need to create it. */
-        MAP_FOREACH(MapKeyElement,current,map){
-            if(map->compareKeyElements(current,keyElement)>0){
-                /* Should be placed here. */
-                Node current_node = mapGetNodeByKey(map,current);
+    if (!mapContains(map, keyElement)) {
+        /* Item does not exist and we need to create it and add it. */
+        Node new_node = nodeCreate(dataElement, keyElement,
+                                   map->copyDataElement,
+                                   map->copyKeyElement,
+                                   map->freeKeyElement); // Creating the new node.
+        if(!new_node){
+            return MAP_OUT_OF_MEMORY;
+        }
+        /* Adding the new node: Trying to find its place. */
+        MAP_FOREACH(MapKeyElement, current, map) {
+            /* Looking for the first key that is bigger than our key. */
+            if (map->compareKeyElements(current, keyElement) > 0) {
+                Node current_node = mapGetNodeByKey(map, current);
+                Node previous_node = mapGetPreviousNode(map, current_node);
+                if (!previous_node){
+                    /* This is not the beginning of the list. */
+                    nodeSetNext(previous_node, new_node);
+                    nodeSetNext(new_node, current_node);
+                    map->mapSize++;
+                    return MAP_SUCCESS;
+                }
+                /* If previous_node is NULL then the new node should be
+                 * * added to the beginning of the list.*/
+                map->list = new_node;
+                nodeSetNext(new_node, current_node);
+                map->mapSize++;
+                return MAP_SUCCESS;
+                }
             }
         }
-    }
     /* If we got here then the item exist and we need to modify its data.*/
-        MAP_FOREACH(MapKeyElement,current,map){
-            if(map->compareKeyElements(current,keyElement)==0){
-                /* Found our key. */
-                if(nodeSetData(map->iterator,dataElement,
-                               map->copyDataElement,map->freeDataElement)!=NODE_SUCCESS)
-                    /*  Memory Error .*/
-                    return MAP_OUT_OF_MEMORY;
-            }
-            return MAP_SUCCESS;
+    MAP_FOREACH(MapKeyElement, current, map) {
+        if (map->compareKeyElements(current, keyElement) == 0) {
+            /* Found our key. */
+            if (nodeSetData(map->iterator, dataElement,
+                            map->copyDataElement, map->freeDataElement) !=
+                NODE_SUCCESS)
+                /*  Memory Error .*/
+                return MAP_OUT_OF_MEMORY;
         }
-
-//        /* Key element does not exists in map.
-//         * Creating a new node. */
-//        Node new_node = nodeCreate(dataElement,keyElement,
-//                                   map->copyDataElement,
-//                                   map->copyKeyElement,
-//                                   map->freeKeyElement);
-//        if(!new_node){ // Node creation failed.
-//            map->iterator = NULL;
-//            return MAP_OUT_OF_MEMORY;
-//        }
-//        MapKeyElement key = nodeGetKey(new_node);
-//        Node after_node = mapFindNodeToPointTo(map, key);
-//        /* Next node is the node that supposed to be after the new node.
-//         * In case of NULL, new node is the current last node.*/
-//        nodeSetNext(new_node,after_node);
-//        Node before_node = mapGetPreviousNode(map,after_node);
-//        if(before_node){
-//            nodeSetNext(before_node,new_node);
-//        }
-//        else{
-//            /*  If we got here then new node should be placed at the
-//             * beginning of the map.*/
-//            map->list = new_node;
-//        }
-//        map->iterator = NULL; // Resetting iterator.
-//        map->mapSize++; // Added new element.
-//        return MAP_SUCCESS;
-//    }
-//    /* If we got here, the key already exists and we need to modify its
-//     * data. */
-//    map->iterator = NULL; // Resetting iterator.
-//    // Modify data of key.
-//    NodeResult result = nodeSetData(mapGetNodeByKey(map,keyElement)
-//            ,dataElement,map->copyDataElement,map->freeDataElement);
-//
-//    if(result!=NODE_SUCCESS){
-//        /* Couldn't create a copy of the new data.
-//         * Node's data remained as it was. */
-//        return MAP_OUT_OF_MEMORY;
-//    }
-//    return MAP_SUCCESS;
+        return MAP_SUCCESS;
+    }
+    /* Shouldn't get here. */
+    return MAP_OUT_OF_MEMORY;
 }
+
 
 /**
 ***** Function: mapGet *****
