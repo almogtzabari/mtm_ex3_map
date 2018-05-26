@@ -13,6 +13,8 @@ static Node mapGetNodeByKey(Map map,MapKeyElement key);
 static Node mapGetPreviousNode(Map map, Node node);
 static MapResult mapAddNewData(Map map, MapKeyElement keyElement,
                                MapDataElement dataElement);
+static MapResult mapModifyData(Map map, MapKeyElement keyElement,
+                               MapDataElement dataElement);
 
 //-----------------------------------------------------------------------//
 //                            STRUCT MAP                                 //
@@ -208,6 +210,7 @@ MapResult mapPut(Map map, MapKeyElement keyElement, MapDataElement dataElement) 
         return MAP_NULL_ARGUMENT;
     }
     if (!mapContains(map, keyElement)) {
+        /* Item doesn't exist and we need to add it */
         MapResult status = mapAddNewData(map, keyElement, dataElement);
         if(status!=MAP_SUCCESS){
             map->iterator = NULL;
@@ -216,20 +219,14 @@ MapResult mapPut(Map map, MapKeyElement keyElement, MapDataElement dataElement) 
         map->iterator = NULL;
         return MAP_SUCCESS;
     }
-    /* If we got here then the item exist and we need to modify its data.*/
-    MAP_FOREACH(MapKeyElement, current, map) {
-        if (map->compareKeyElements(current, keyElement) == 0) {
-            /* Found our key. */
-            if (nodeSetData(map->iterator, dataElement,
-                            map->copyDataElement, map->freeDataElement) !=
-                NODE_SUCCESS)
-                /*  Memory Error .*/
-                return MAP_OUT_OF_MEMORY;
-        }
-        return MAP_SUCCESS;
+    /* Item exist and we need to modify its data.*/
+    MapResult status = mapModifyData(map,keyElement,dataElement);
+    if(status!=MAP_SUCCESS){
+        map->iterator = NULL;
+        return MAP_OUT_OF_MEMORY;
     }
-    /* Shouldn't get here. */
-    return MAP_OUT_OF_MEMORY;
+    map->iterator = NULL;
+    return MAP_SUCCESS;
 }
 
 
@@ -507,5 +504,22 @@ static MapResult mapAddNewData(Map map, MapKeyElement keyElement,
     return MAP_SUCCESS;
 }
 
+static MapResult mapModifyData(Map map, MapKeyElement keyElement,
+                               MapDataElement dataElement){
+
+    MAP_FOREACH(MapKeyElement, current, map) {
+        if (map->compareKeyElements(current, keyElement) == 0) {
+            /* Found our key. */
+            if (nodeSetData(map->iterator, dataElement,
+                            map->copyDataElement, map->freeDataElement) !=
+                NODE_SUCCESS)
+                /*  Memory Error .*/
+                return MAP_OUT_OF_MEMORY;
+        }
+        return MAP_SUCCESS;
+    }
+    /* Shouldn't get here. */
+    return MAP_OUT_OF_MEMORY;
+}
 
 
