@@ -236,8 +236,17 @@ MapResult mapPut(Map map, MapKeyElement keyElement, MapDataElement dataElement) 
         }
         /* If we got here then the new node should be at the end. */
         Node previous_node = mapGetPreviousNode(map,NULL);
+        if(!previous_node){
+            /* List is empty*/
+            map->list = new_node;
+            map->mapSize++;
+            return MAP_SUCCESS;
+        }
+        /* List is not empty. */
         nodeSetNext(previous_node,new_node);
         nodeSetNext(new_node,NULL);
+        map->mapSize++;
+        return MAP_SUCCESS;
     }
     /* If we got here then the item exist and we need to modify its data.*/
     MAP_FOREACH(MapKeyElement, current, map) {
