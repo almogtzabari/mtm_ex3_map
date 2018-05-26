@@ -58,6 +58,7 @@ Map mapCreate(copyMapDataElements copyDataElement,
     Map map = malloc(sizeof(*map));
     if(!map || !copyDataElement || !copyKeyElement || !freeDataElement
        || !freeKeyElement || !compareKeyElements){
+        mapDestroy(map);
         return NULL;
     }
     map->copyDataElement = copyDataElement;

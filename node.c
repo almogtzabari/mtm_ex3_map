@@ -50,8 +50,8 @@ Node nodeCreate(NodeDataElement data, NodeKeyElement key,
     new_node->data = copyDataElement(data);
     if(!new_node->data){
         /* Failed to copy data. */
-        free(new_node);
         freeKeyElement(new_node->key);
+        free(new_node);
     }
     new_node->next = NULL;
     return new_node;

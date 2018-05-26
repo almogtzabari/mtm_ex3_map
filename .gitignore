@@ -28,3 +28,12 @@ cmake-build-debug/mtm_ex3_map.cbp
 cmake-build-debug/CMakeFiles/Progress/1
 cmake-build-debug/CMakeFiles/Progress/2
 cmake-build-debug/CMakeFiles/Progress/3
+.idea/.name
+*.make
+*.includecache
+*.internal
+*.rsp
+*.obj
+*.a
+*.cbp
+*.stackdump
