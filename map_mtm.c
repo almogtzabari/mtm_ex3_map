@@ -8,7 +8,7 @@
 //                  DECLARATIONS OF STATIC FUNCTIONS                     //
 //-----------------------------------------------------------------------//
 
-static Node mapFindNodeToPointTo(Map map, MapKeyElement key);
+//static Node mapFindNodeToPointTo(Map map, MapKeyElement key);
 static Node mapGetNodeByKey(Map map,MapKeyElement key);
 static Node mapGetPreviousNode(Map map, Node node);
 
@@ -407,30 +407,30 @@ MapResult mapClear(Map map) {
 //                        MAP STATIC FUNCTIONS                           //
 //-----------------------------------------------------------------------//
 
-/**
-***** Static function: mapFindNodeToPointTo *****
-* Description: Finds the node in the map that should be pointed by the
-* new created node.
-*
-* @param map - The map to search the node in.
-* @param key - The key element which belongs to the node that should be
-* pointed by the new node.
-* @return
-* A pointer to the node that should be pointed by the new created
-* node.
-* NULL if the new node should be placed at the end of the map.
-*/
-static Node mapFindNodeToPointTo(Map map, MapKeyElement key){
-    MAP_FOREACH(MapKeyElement,iterator,map) {
-        if(map->compareKeyElements(iterator,key)<0){
-            continue;
-        }
-        return mapGetNodeByKey(map,iterator);
-    }
-    /* If we got here then the node should be placed at the end of the
-     * map. */
-    return NULL;
-}
+///**
+//***** Static function: mapFindNodeToPointTo *****
+//* Description: Finds the node in the map that should be pointed by the
+//* new created node.
+//*
+//* @param map - The map to search the node in.
+//* @param key - The key element which belongs to the node that should be
+//* pointed by the new node.
+//* @return
+//* A pointer to the node that should be pointed by the new created
+//* node.
+//* NULL if the new node should be placed at the end of the map.
+//*/
+//static Node mapFindNodeToPointTo(Map map, MapKeyElement key){
+//    MAP_FOREACH(MapKeyElement,iterator,map) {
+//        if(map->compareKeyElements(iterator,key)<0){
+//            continue;
+//        }
+//        return mapGetNodeByKey(map,iterator);
+//    }
+//    /* If we got here then the node should be placed at the end of the
+//     * map. */
+//    return NULL;
+//}
 
 /**
 ***** Static function: mapGetNodeByKey *****
