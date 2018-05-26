@@ -373,15 +373,10 @@ MapResult mapClear(Map map) {
     if(!map){
         return MAP_NULL_ARGUMENT;
     }
-    Node node_iterator = map->list, temp_node;
-    while (node_iterator) {
-        temp_node = node_iterator;
-        node_iterator = nodeGetNext(node_iterator);
-        nodeDestroy(temp_node, map->freeDataElement,
-                    map->freeKeyElement);
+    for(int i=0;i<map->mapSize;i++){
+        mapRemove(map,mapGetFirst(map));
     }
     return MAP_SUCCESS;
-
 }
 
 //-----------------------------------------------------------------------//
