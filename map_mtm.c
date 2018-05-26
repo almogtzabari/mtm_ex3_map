@@ -171,7 +171,7 @@ bool mapContains(Map map, MapKeyElement element){
     if(!map){
         return false;
     }
-    MAP_FOREACH(Node,current,map){
+    MAP_FOREACH(MapKeyElement,current,map){
         if(map->compareKeyElements(current,element)==0){
             /* Found needed key. */
             return true;
@@ -205,8 +205,21 @@ MapResult mapPut(Map map, MapKeyElement keyElement, MapDataElement dataElement){
         return MAP_NULL_ARGUMENT;
     }
     if(!mapContains(map,keyElement)){
-        
+        /* Item does not exist and we need to create it. */
+        MAP_FOREACH(MapKeyElement)
     }
+    /* If we got here then the item exist and we need to modify its data.*/
+        MAP_FOREACH(MapKeyElement,current,map){
+            if(map->compareKeyElements(current,keyElement)==0){
+                /* Found our key. */
+                if(nodeSetData(map->iterator,dataElement,
+                               map->copyDataElement,map->freeDataElement)!=NODE_SUCCESS)
+                    /*  Memory Error .*/
+                    return MAP_OUT_OF_MEMORY;
+            }
+            return MAP_SUCCESS;
+        }
+
 //        /* Key element does not exists in map.
 //         * Creating a new node. */
 //        Node new_node = nodeCreate(dataElement,keyElement,
