@@ -206,7 +206,12 @@ MapResult mapPut(Map map, MapKeyElement keyElement, MapDataElement dataElement){
     }
     if(!mapContains(map,keyElement)){
         /* Item does not exist and we need to create it. */
-        MAP_FOREACH(MapKeyElement)
+        MAP_FOREACH(MapKeyElement,current,map){
+            if(map->compareKeyElements(current,keyElement)>0){
+                /* Should be placed here. */
+                Node current_node = mapGetNodeByKey(map,current);
+            }
+        }
     }
     /* If we got here then the item exist and we need to modify its data.*/
         MAP_FOREACH(MapKeyElement,current,map){
